@@ -1,0 +1,32 @@
+{{- range .Values.clients }}
+{{- $clientRealm := .realm }}
+---
+apiVersion: keycloak.org/v1alpha1
+kind: KeycloakClient
+metadata:
+  name: {{ .clientId }}
+  namespace: {{ $.Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    {{- range $key, $value := .labels }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+spec:
+  realmSelector:
+    matchLabels:
+      {{- $matchLabels := dict }}
+      {{- range $.Values.realms }}
+        {{- if eq .name $clientRealm }}
+          {{- $matchLabels = .labels }}
+        {{- end }}
+      {{- end }}
+      {{- range $key, $value := $matchLabels }}
+      {{ $key }}: {{ $value }}
+      {{- end }}
+  client:
+    clientId: {{ .clientId }}
+    clientAuthenticatorType: client-secret
+    redirectUris:
+      - "{{ .redirectUri }}"
+{{- end }}

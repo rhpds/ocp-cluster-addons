@@ -1,0 +1,25 @@
+{{- range .Values.realms }}
+---
+apiVersion: keycloak.org/v1alpha1
+kind: KeycloakRealm
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  labels:
+    {{- range $key, $value := .labels }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+spec:
+  instanceSelector:
+    matchLabels:
+      {{- range $key, $value := $.Values.keycloak.labels }}
+      {{ $key }}: {{ $value }}
+      {{- end }}
+  realm:
+    id: "{{ .name }}"
+    realm: "{{ .name }}"
+    enabled: True
+    displayName: "{{ .displayName }}"
+{{- end }}
