@@ -4,6 +4,8 @@ kind: Keycloak
 metadata:
   name: rhsso-keycloak
   namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   labels:
     {{- range $key, $value := .Values.keycloak.labels }}
     {{ $key }}: {{ $value }}

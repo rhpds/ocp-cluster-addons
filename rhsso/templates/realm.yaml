@@ -4,6 +4,8 @@ kind: KeycloakRealm
 metadata:
   name: {{ .Values.realm.name }}
   namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   labels:
     app: sso
 spec:
