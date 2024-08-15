@@ -12,7 +12,7 @@ spec:
     path: rhsso
     helm:
       values: |
-        namespace: rhsso-01
+        namespace: rhsso
         users:  
           - username: admin
             password: password
