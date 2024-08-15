@@ -38,4 +38,5 @@ users: []
   # - username: username
   #   password: password
   #   email: username@domain.com
-  #   admin: true
+  #   admin: false
+  #   realm: rhdp

@@ -17,8 +17,9 @@ spec:
           - username: admin
             password: password
             email: admin@rhdp.com
+            admin: true
+            realm: rhdp
   destination:
     namespace: rhsso
     server: https://kubernetes.default.svc
-  syncPolicy:
-    automated: {}
+  syncPolicy: {}
