@@ -9,9 +9,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   labels:
-    {{- range $key, $value := .labels }}
-    {{ $key }}: {{ $value }}
-    {{- end }}
+    app: sso
 spec:
   realmSelector:
     matchLabels:
@@ -27,8 +25,14 @@ spec:
   client:
     clientId: {{ .clientId }}
     clientAuthenticatorType: client-secret
-    redirectUris:
-      - "{{ .redirectUri }}"
     standardFlowEnabled: true
     directAccessGrantsEnabled: true
+    redirectUris:
+      - "{{ .redirectUri }}"
+    defaultClientScopes:
+    - profile
+    - email
+    - roles
+    - acr
+    - web-origins
 {{- end }}

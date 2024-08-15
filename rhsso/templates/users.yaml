@@ -23,6 +23,7 @@ spec:
     credentials:
       - type: password
         value: {{ .password }}
+        temporary: false
     email: {{ .email }}
     emailVerified: true
     enabled: true

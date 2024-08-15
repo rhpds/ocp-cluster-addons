@@ -20,6 +20,6 @@ spec:
   realm:
     id: "{{ .name }}"
     realm: "{{ .name }}"
-    enabled: True
+    enabled: true
     displayName: "{{ .displayName }}"
 {{- end }}

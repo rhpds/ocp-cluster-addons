@@ -14,9 +14,9 @@ spec:
       values: |
         namespace: rhsso
         users:  
-          - username: admin
+          - username: ssoadmin
             password: password
-            email: admin@rhdp.com
+            email: ssoadmin@rhdp.com
             admin: true
             realm: rhdp
   destination:

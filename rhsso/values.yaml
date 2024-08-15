@@ -16,6 +16,7 @@ realms:
     displayName: "Red Hat Demo Platform"
     labels:
       app: sso
+      realm: rhdp
   # - name: other
   #   displayName: "Other Realm"
   #   labels:
@@ -24,14 +25,9 @@ realms:
 clients:
   - clientId: openshift
     redirectUri: '*'
-    labels:
-      app: sso
     realm: rhdp
   # - clientId: other
   #   redirectUri: '*'
-  #   displayName: "Other Client"
-  #   labels:
-  #     app: example
   #   realm: other
 
 users: []
