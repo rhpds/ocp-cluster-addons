@@ -29,4 +29,6 @@ spec:
     clientAuthenticatorType: client-secret
     redirectUris:
       - "{{ .redirectUri }}"
+    standardFlowEnabled: true
+    directAccessGrantsEnabled: true
 {{- end }}
