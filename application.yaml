@@ -12,7 +12,11 @@ spec:
     path: rhsso
     helm:
       values: |
-        namespace: rhsso
+        namespace: rhsso-01
+        users:  
+          - username: admin
+            password: password
+            email: admin@rhdp.com
   destination:
     namespace: rhsso
     server: https://kubernetes.default.svc
