@@ -5,6 +5,7 @@ apiVersion: keycloak.org/v1alpha1
 kind: KeycloakUser
 metadata:
   name: {{ .username }}
+  namespace: {{ $.Values.namespace }}
 spec:
   realmSelector:
     matchLabels:
