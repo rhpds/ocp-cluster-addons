@@ -1,0 +1,14 @@
+---
+apiVersion: keycloak.org/v1alpha1
+kind: Keycloak
+metadata:
+  name: rhsso-keycloak
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- range $key, $value := .Values.keycloak.labels }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+spec:
+  instances: 1
+  externalAccess:
+    enabled: True
