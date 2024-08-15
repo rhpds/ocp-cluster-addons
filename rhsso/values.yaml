@@ -35,6 +35,7 @@ clients:
   #   realm: other
 
 users: []
-  # - username: admin
+  # - username: username
   #   password: password
-  #   email: admin@rhdp.com
+  #   email: username@domain.com
+  #   admin: true

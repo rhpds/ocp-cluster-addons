@@ -26,4 +26,19 @@ spec:
     email: {{ .email }}
     emailVerified: true
     enabled: true
+{{ if .admin }}
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cluster-admin-rhsso-{{ .username }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: {{ .username }}
+{{- end }}
 {{- end }}
