@@ -42,7 +42,7 @@ data:
               apiVersion: v1
               kind: Secret
               metadata:
-                name: openid-client-secret-{{ $clientId }}
+                name: keycloak-client-secret-{{ $clientId }}
                 namespace: openshift-config
               stringData:
                 clientSecret: "{{`{{ keycloak_client_secret }}`}}"
