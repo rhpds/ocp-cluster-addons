@@ -45,19 +45,19 @@ data:
             name: cluster
             definition:
               spec:
-              identityProviders:
-              - type: OpenID
-                mappingMethod: claim
-                name: rhsso
-                openID:
-                  clientID: {{ $clientId }}
-                  clientSecret:
-                    name: keycloak-client-secret-{{ $clientId }}
-                  claims:
-                    preferredUsername:
-                      - preferred_username
-                    name:
-                      - name
-                    email:
-                      - email
-                  issuer: {{ .Values.oauth.issuer }}
+                identityProviders:
+                - type: OpenID
+                  mappingMethod: claim
+                  name: rhsso
+                  openID:
+                    clientID: {{ $clientId }}
+                    clientSecret:
+                      name: keycloak-client-secret-{{ $clientId }}
+                    claims:
+                      preferredUsername:
+                        - preferred_username
+                      name:
+                        - name
+                      email:
+                        - email
+                    issuer: {{ .Values.oauth.issuer }}
