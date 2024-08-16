@@ -36,3 +36,15 @@ users: []
   #   email: username@domain.com
   #   admin: false
   #   realm: rhdp
+
+# Using sub-chart helper-status-checker
+helper-status-checker:
+  enabled: true
+  approver: false
+  checks:
+    - operatorName: rhsso-operator
+      namespace:
+        name: rhsso
+      syncwave: '1'
+      serviceAccount:
+        name: "rhsso-status-checker"

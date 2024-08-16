@@ -6,8 +6,8 @@ metadata:
   name: {{ .name }}
   namespace: {{ $.Values.namespace }}
   annotations:
+    argocd.argoproj.io/sync-wave: "3"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/sync-wave: "1"
   labels:
     {{- range $key, $value := .labels }}
     {{ $key }}: {{ $value }}

@@ -5,8 +5,6 @@ kind: OperatorGroup
 metadata:
   name: rhsso-operator-group
   namespace: {{ .Values.namespace }}
-  annotations:
-    argocd.argoproj.io/hook: PreSync
 spec:
   targetNamespaces:
   -  {{ .Values.namespace }}
@@ -16,8 +14,6 @@ kind: Subscription
 metadata:
   name: rhsso-operator
   namespace: {{ .Values.namespace }}
-  annotations:
-    argocd.argoproj.io/hook: PreSync
 spec:
   channel: stable
   installPlanApproval: Automatic
