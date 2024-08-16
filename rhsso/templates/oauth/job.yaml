@@ -49,4 +49,4 @@ spec:
       volumes:
       - name: ansible
         configMap:
-          name: ansible-playbook
+          name: oauth-ansible-playbook
