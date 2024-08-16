@@ -37,6 +37,11 @@ users: []
   #   admin: false
   #   realm: rhdp
 
+oauth:
+  enabled: true
+  clientId: openshift
+  issuer: https://keycloak.domain.com/auth/realms/rhdp
+
 # Using sub-chart helper-status-checker
 helper-status-checker:
   enabled: true

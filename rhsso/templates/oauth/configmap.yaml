@@ -1,0 +1,63 @@
+{{ $clientId := .Values.oauth.clientId }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oauth-ansible-playbook
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+data:
+  playbook.yaml: |
+    ---
+    - name: setup oauth playbook
+      hosts: localhost
+      connection: local
+      gather_facts: false
+      tasks:
+        - name: retrieve keycloak client credentials
+          kubernetes.core.k8s_info:
+            api_version: v1
+            kind: Secret
+            name: keycloak-client-secret-{{ $clientId }}
+            namespace: "{{ .Values.namespace }}"
+          register: r_client_credentials
+          retries: 120
+          delay: 10
+          until:
+          - r_client_credentials is defined
+          - r_client_credentials.resources is defined
+          - r_client_credentials.resources | length > 0
+          - r_client_credentials.resources[0].data is defined
+          - r_client_credentials.resources[0].data.CLIENT_SECRET is defined
+          - r_client_credentials.resources[0].data.CLIENT_SECRET | length > 0
+        - name: decode keycloak client secret
+          ansible.builtin.set_fact:
+            keycloak_client_secret: "{{`{{ r_client_credentials.resources[0].data.CLIENT_SECRET | b64decode }}`}}"
+        - name: create keycloak client secret in openshift-config
+          ansible.builtin.shell: |-
+            oc create secret generic keycloak-client-secret-{{ $clientId }} --from-literal=clientSecret={{`{{ keycloak_client_secret }}`}} -n openshift-config
+        - name: patch cluster oauth with keycloak identity provider
+          kubernetes.core.k8s:
+            state: patched
+            kind: OAuth
+            name: cluster
+            definition:
+              spec:
+              identityProviders:
+              - type: OpenID
+                mappingMethod: claim
+                name: rhsso
+                openID:
+                  clientID: {{ $clientId }}
+                  clientSecret:
+                    name: keycloak-client-secret-{{ $clientId }}
+                  claims:
+                    preferredUsername:
+                      - preferred_username
+                    name:
+                      - name
+                    email:
+                      - email
+                  issuer: {{ .Values.oauth.issuer }}

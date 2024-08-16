@@ -19,6 +19,16 @@ spec:
             email: ssoadmin@rhdp.com
             admin: true
             realm: rhdp
+        oauth:
+          issuer: https://keycloak-rhsso.apps.cluster-guid.guid.sandbox.opentlc.com/auth/realms/rhdp
+        helper-status-checker:
+          checks:
+            - operatorName: rhsso-operator
+              namespace:
+                name: rhsso
+              syncwave: '1'
+              serviceAccount:
+                name: "rhsso-status-checker"
   destination:
     namespace: rhsso
     server: https://kubernetes.default.svc
