@@ -36,8 +36,17 @@ data:
           ansible.builtin.set_fact:
             keycloak_client_secret: "{{`{{ r_client_credentials.resources[0].data.CLIENT_SECRET | b64decode }}`}}"
         - name: create keycloak client secret in openshift-config
-          ansible.builtin.shell: |-
-            oc create secret generic keycloak-client-secret-{{ $clientId }} --from-literal=clientSecret={{`{{ keycloak_client_secret }}`}} -n openshift-config
+          kubernetes.core.k8s:
+            state: present
+            definition:
+              apiVersion: v1
+              kind: Secret
+              metadata:
+                name: openid-client-secret-{{ $clientId }}
+                namespace: openshift-config
+              stringData:
+                clientSecret: {{`{{ keycloak_client_secret }}`}}
+              type: Opaque
         - name: patch cluster oauth with keycloak identity provider
           kubernetes.core.k8s:
             state: patched
