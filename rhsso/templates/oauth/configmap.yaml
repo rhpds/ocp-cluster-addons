@@ -45,7 +45,7 @@ data:
                 name: openid-client-secret-{{ $clientId }}
                 namespace: openshift-config
               stringData:
-                clientSecret: {{`{{ keycloak_client_secret }}`}}
+                clientSecret: "{{`{{ keycloak_client_secret }}`}}"
               type: Opaque
         - name: patch cluster oauth with keycloak identity provider
           kubernetes.core.k8s:
