@@ -6,6 +6,8 @@ kind: KeycloakUser
 metadata:
   name: {{ .username }}
   namespace: {{ $.Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   realmSelector:
     matchLabels:
