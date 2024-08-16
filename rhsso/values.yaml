@@ -5,7 +5,7 @@
 namespace: rhsso
 
 operator:
-  startingCSV: rhsso-operator.7.6.0-opr-001
+  install: true
 
 keycloak:
   labels:

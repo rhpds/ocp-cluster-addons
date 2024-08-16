@@ -1,3 +1,4 @@
+{{ if .Values.operator.install -}}
 ---
 apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
@@ -23,4 +24,4 @@ spec:
   name: rhsso-operator
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  startingCSV: {{ .Values.operator.startingCSV }}
+{{- end }}
