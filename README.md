@@ -1,4 +1,3 @@
 # OCP Cluster Addons
 
-WIP...
-
+Collection of addons for OpenShift Container Platform.
