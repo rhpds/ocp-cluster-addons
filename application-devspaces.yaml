@@ -1,0 +1,29 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rhsso
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/juliaaano/ocp-cluster-addons
+    targetRevision: main
+    path: devspaces
+    helm:
+      values: |
+        namespace: devspaces
+        operator:
+          startingCSV: devspacesoperator.v3.15.0
+        helper-status-checker:
+          checks:
+            - operatorName: devspaces-operator
+              namespace:
+                name: devspaces
+              syncwave: '1'
+              serviceAccount:
+                name: "rhsso-status-checker"
+  destination:
+    namespace: rhsso
+    server: https://kubernetes.default.svc
+  syncPolicy: {}

@@ -1,0 +1,21 @@
+{{ if .Values.checluster -}}
+---
+apiVersion: org.eclipse.che/v2
+kind: CheCluster
+metadata:
+  name: {{ .Values.checluster.name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  components:
+    {{- toYaml .Values.checluster.components | nindent 4 }}
+  containerRegistry:
+    {{- toYaml .Values.checluster.containerRegistry | nindent 4 }}
+  devEnvironments:
+    {{- toYaml .Values.checluster.devEnvironments | nindent 4 }}
+  gitServices:
+    {{- toYaml .Values.checluster.gitServices | nindent 4 }}
+  networking:
+    {{- toYaml .Values.checluster.networking | nindent 4 }}
+{{- end }}

@@ -1,0 +1,39 @@
+# Default values for devspaces.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+namespace: openshift-operators
+
+# Set to empty to NOT install the Operator
+# operator: {}
+operator:
+  name: devspaces
+  channel: stable
+  installPlanApproval: Automatic
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  # startingCSV: devspacesoperator.v3.15.0
+
+# Set to empty to NOT install CheCluster
+# checluster: {}
+checluster:
+  name: devspaces
+  components: {}
+  containerRegistry: {}
+  devEnvironments:
+    startTimeoutSeconds: 1200
+    secondsOfInactivityBeforeIdling: -1
+  gitServices: {}
+  networking: {}
+
+# Using sub-chart helper-status-checker
+helper-status-checker:
+  enabled: true
+  approver: false
+  checks:
+    - operatorName: devspaces
+      namespace:
+        name: devspaces
+      syncwave: '1'
+      serviceAccount:
+        name: "devspaces-status-checker"
