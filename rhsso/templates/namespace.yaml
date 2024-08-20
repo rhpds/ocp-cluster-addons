@@ -4,5 +4,5 @@ kind: Namespace
 metadata:
   name: {{ .Values.namespace }}
   annotations:
-    openshift.io/description: "Red Hat Single Sign-On Namespace"
-    openshift.io/display-name: "RHSSO Namespace"
+    openshift.io/description: "Red Hat Single Sign-On"
+    openshift.io/display-name: "RHSSO"

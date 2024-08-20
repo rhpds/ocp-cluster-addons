@@ -13,7 +13,7 @@ spec:
     helm:
       values: |
         namespace: rhsso
-        users:  
+        users:
           - username: ssoadmin
             password: password
             email: ssoadmin@rhdp.com
