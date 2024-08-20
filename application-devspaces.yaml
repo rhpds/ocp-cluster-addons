@@ -12,18 +12,18 @@ spec:
     path: devspaces
     helm:
       values: |
-        namespace: devspaces
+        namespace: openshift-operators
         operator:
           startingCSV: devspacesoperator.v3.15.0
         helper-status-checker:
           checks:
             - operatorName: devspaces
               namespace:
-                name: devspaces
+                name: openshift-operators
               syncwave: '1'
               serviceAccount:
                 name: "devspaces-status-checker"
   destination:
-    namespace: devspaces
+    namespace: openshift-operators
     server: https://kubernetes.default.svc
   syncPolicy: {}

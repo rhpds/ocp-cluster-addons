@@ -33,7 +33,7 @@ helper-status-checker:
   checks:
     - operatorName: devspaces
       namespace:
-        name: devspaces
+        name: openshift-operators
       syncwave: '1'
       serviceAccount:
         name: "devspaces-status-checker"
