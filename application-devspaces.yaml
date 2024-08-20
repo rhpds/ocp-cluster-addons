@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: rhsso
+  name: devspaces
   namespace: openshift-gitops
 spec:
   project: default
@@ -22,8 +22,8 @@ spec:
                 name: devspaces
               syncwave: '1'
               serviceAccount:
-                name: "rhsso-status-checker"
+                name: "devspaces-status-checker"
   destination:
-    namespace: rhsso
+    namespace: devspaces
     server: https://kubernetes.default.svc
   syncPolicy: {}
