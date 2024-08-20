@@ -2,7 +2,7 @@
 apiVersion: keycloak.org/v1alpha1
 kind: Keycloak
 metadata:
-  name: rhsso-keycloak
+  name: {{ .Values.keycloak.name }}
   namespace: {{ .Values.namespace }}
   annotations:
     argocd.argoproj.io/sync-wave: "2"

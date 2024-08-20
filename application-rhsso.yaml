@@ -13,6 +13,8 @@ spec:
     helm:
       values: |
         namespace: rhsso
+        operator:
+          startingCSV: rhsso-operator.7.6.9-opr-002
         users:
           - username: ssoadmin
             password: password
