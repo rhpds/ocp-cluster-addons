@@ -17,7 +17,7 @@ spec:
           startingCSV: devspacesoperator.v3.15.0
         helper-status-checker:
           checks:
-            - operatorName: devspaces-operator
+            - operatorName: devspaces
               namespace:
                 name: devspaces
               syncwave: '1'
