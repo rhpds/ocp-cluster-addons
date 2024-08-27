@@ -1,3 +1,3 @@
 # OCP Cluster Addons
 
-Collection of addons for OpenShift Container Platform.
+Collection of addons for the OpenShift Container Platform.
