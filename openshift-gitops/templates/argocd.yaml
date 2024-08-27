@@ -1,0 +1,25 @@
+{{- if .Values.argocd.install }}
+---
+apiVersion: argoproj.io/v1beta1
+kind: ArgoCD
+metadata:
+  name: {{ .Values.argocd.name }}
+  namespace: {{ .Values.argocd.namespace }}
+spec:
+  {{- $sections := dict
+    "server" .Values.argocd.server
+    "sso" .Values.argocd.sso
+    "applicationSet" .Values.argocd.applicationSet
+    "rbac" .Values.argocd.rbac
+    "repo" .Values.argocd.repo
+    "redis" .Values.argocd.redis
+    "controller" .Values.argocd.controller
+  -}}
+  {{- range $key, $value := $sections }}
+  {{- if $value }}
+  {{ $key }}:
+    {{- toYaml $value | nindent 4 }}
+  {{- end }}
+  {{- end }}
+  initialSSHKnownHosts: {}
+{{- end }}

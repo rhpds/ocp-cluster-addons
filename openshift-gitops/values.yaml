@@ -1,0 +1,93 @@
+# Default values for openshift-gitops.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Installs the operator when operator.install is true.
+operator:
+  install: false
+  name: openshift-gitops-operator
+  namespace: openshift-operators
+  channel: latest
+  installPlanApproval: Automatic
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  # startingCSV: openshift-gitops-operator.v1.13.1
+
+# Configures the ArgoCD instance when argocd.install is true.
+# The configuration of any of the components below is optional, so you can uncomment and set the values as needed.
+argocd:
+  install: false
+  name: openshift-gitops
+  namespace: openshift-gitops
+  # rbac:
+  #   policy: |
+  #     g, system:cluster-admins, role:admin
+  #     g, cluster-admins, role:admin
+  #   scopes: '[groups]'
+  # server:
+  #   resources:
+  #     limits:
+  #       cpu: 500m
+  #       memory: 256Mi
+  #     requests:
+  #       cpu: 125m
+  #       memory: 128Mi
+  #   insecure: true
+  #   route:
+  #     enabled: true
+  #     tls:
+  #       termination: edge
+  #       insecureEdgeTerminationPolicy: Redirect
+  # sso:
+  #   dex:
+  #     resources:
+  #       limits:
+  #         cpu: 500m
+  #         memory: 256Mi
+  #       requests:
+  #         cpu: 250m
+  #         memory: 128Mi
+  # applicationSet:
+  #   resources:
+  #     limits:
+  #       cpu: '2'
+  #       memory: 1Gi
+  #     requests:
+  #       cpu: 250m
+  #       memory: 512Mi
+  # repo:
+  #   resources:
+  #     limits:
+  #       cpu: '1'
+  #       memory: 1Gi
+  #     requests:
+  #       cpu: 250m
+  #       memory: 256Mi
+  # redis:
+  #   resources:
+  #     limits:
+  #       cpu: 500m
+  #       memory: 256Mi
+  #     requests:
+  #       cpu: 250m
+  #       memory: 128Mi
+  # controller:
+  #   resources:
+  #     limits:
+  #       cpu: '2'
+  #       memory: 2Gi
+  #     requests:
+  #       cpu: 250m
+  #       memory: 1Gi
+
+# Configures RBAC when argocd.install is true.
+# The configuration of either clusterRoleBinding or groups are optional, set to empty '{}' to skip.
+rbac:
+  clusterRoleBinding:
+    clusterRole: cluster-admin
+    serviceAccount: openshift-gitops-argocd-application-controller
+  group:
+    name: cluster-admins
+    users:
+    - admin
+    - ssoadmin

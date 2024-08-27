@@ -1,0 +1,28 @@
+{{- if .Values.argocd.install }}
+{{- if .Values.rbac.clusterRoleBinding }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: gitops-cluster-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Values.rbac.clusterRoleBinding.clusterRole }}
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.rbac.clusterRoleBinding.serviceAccount }}
+  namespace: {{ .Values.argocd.namespace }}
+{{- end }}
+{{- if .Values.rbac.group }}
+---
+apiVersion: user.openshift.io/v1
+kind: Group
+metadata:
+  name: {{ .Values.rbac.group.name }}
+users:
+  {{- range .Values.rbac.group.users }}
+  - {{ . }}
+  {{- end }}
+{{- end }}
+{{- end }}
