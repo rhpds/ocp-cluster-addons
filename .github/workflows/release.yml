@@ -3,9 +3,7 @@ name: helm release
 on:
   workflow_dispatch:
   push:
-    branches: [main]
-    paths:
-      - 'charts/**'
+    tags: [v*]
 
 jobs:
   release:

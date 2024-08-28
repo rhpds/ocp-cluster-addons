@@ -6,12 +6,12 @@
 operator:
   install: false
   name: openshift-gitops-operator
-  namespace: openshift-operators
+  namespace: openshift-gitops-operator
   channel: latest
   installPlanApproval: Automatic
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  # startingCSV: openshift-gitops-operator.v1.13.1
+  # startingCSV: openshift-gitops-operator.x.y.z
 
 # Configures the ArgoCD instance when argocd.install is true.
 # The configuration of any of the components below is optional, so you can uncomment and set the values as needed.
