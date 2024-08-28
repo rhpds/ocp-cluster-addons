@@ -12,7 +12,7 @@ operator:
   installPlanApproval: Automatic
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  # startingCSV: rhsso-operator.7.6.9-opr-002
+  # startingCSV: rhsso-operator.x.y.z
 
 keycloak:
   name: rhsso-keycloak

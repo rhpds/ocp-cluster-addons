@@ -11,7 +11,7 @@ When used with an ArgoCD Application, this Helm chart provides the following fun
 
 ## Usage
 
-To use this Helm chart with ArgoCD, you can refer to the `application-devspaces.yaml` file provided in this repository.
+To use this Helm chart with ArgoCD, you can refer to the [application-devspaces.yaml](/application-devspaces.yaml) file provided in this repository.
 
 ## Prerequisites
 

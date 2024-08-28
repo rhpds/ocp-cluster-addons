@@ -12,7 +12,7 @@ operator:
   installPlanApproval: Automatic
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  # startingCSV: devspacesoperator.v3.15.0
+  # startingCSV: devspacesoperator.x.y.z
 
 # Set to empty to NOT install CheCluster
 # checluster: {}
