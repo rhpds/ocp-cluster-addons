@@ -1,0 +1,13 @@
+{{ if .Values.datasciencecluster -}}
+---
+apiVersion: datasciencecluster.opendatahub.io/v1
+kind: DataScienceCluster
+metadata:
+  name: {{ .Values.datasciencecluster.name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  components:
+    {{- .Values.datasciencecluster.components | toYaml | nindent 4 }}
+{{- end }}

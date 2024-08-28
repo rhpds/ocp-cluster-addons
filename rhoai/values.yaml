@@ -1,0 +1,52 @@
+# Default values for rhoai.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Set to empty to NOT install the Operator
+# operator: {}
+operator:
+  name: rhods-operator
+  namespace: redhat-ods-operator
+  channel: stable
+  installPlanApproval: Automatic
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  # startingCSV: rhods-operator.x.y.x
+
+# Set to empty to NOT install DataScienceCluster
+# datasciencecluster: {}
+datasciencecluster:
+  name: default-dsc
+  components:
+    codeflare:
+      managementState: Removed
+    dashboard:
+      managementState: Removed
+    datasciencepipelines:
+      managementState: Removed
+    kserve:
+      managementState: Removed  
+    kueue:
+      managementState: Removed
+    modelmeshserving:
+      managementState: Removed
+    ray:
+      managementState: Removed
+    workbenches:
+      managementState: Removed
+    trainingoperator:
+      managementState: Removed
+    trustyai:
+      managementState: Removed
+
+# Using sub-chart helper-status-checker
+helper-status-checker:
+  enabled: true
+  approver: false
+  checks:
+    - operatorName: rhods-operator
+      namespace:
+        name: redhat-ods-operator
+      syncwave: '1'
+      serviceAccount:
+        name: "rhoai-status-checker"
