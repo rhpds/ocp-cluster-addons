@@ -14,6 +14,7 @@ spec:
     "repo" .Values.argocd.repo
     "redis" .Values.argocd.redis
     "controller" .Values.argocd.controller
+    "resourceHealthChecks" .Values.argocd.resourceHealthChecks
   -}}
   {{- range $key, $value := $sections }}
   {{- if $value }}
