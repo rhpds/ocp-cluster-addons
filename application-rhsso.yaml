@@ -15,6 +15,7 @@ spec:
         namespace: rhsso
         operator:
           startingCSV: rhsso-operator.7.6.9-opr-002
+          installPlanApproval: Manual
         users:
           - username: ssoadmin
             password: password
@@ -24,6 +25,7 @@ spec:
         oauth:
           issuer: https://keycloak-rhsso.apps.cluster-guid.guid.sandbox.opentlc.com/auth/realms/rhdp
         helper-status-checker:
+          approver: true
           checks:
             - operatorName: rhsso-operator
               namespace:

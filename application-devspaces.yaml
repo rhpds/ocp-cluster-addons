@@ -15,7 +15,9 @@ spec:
         namespace: openshift-operators
         operator:
           startingCSV: devspacesoperator.v3.15.0
+          installPlanApproval: Manual
         helper-status-checker:
+          approver: true
           checks:
             - operatorName: devspaces
               namespace:
