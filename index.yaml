@@ -1,0 +1,15 @@
+apiVersion: v1
+entries:
+  openshift-gitops:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-08-30T13:16:37.053737648Z"
+    description: Installs the OpenShift GitOps operator and configures the ArgoCD
+      instance.
+    digest: 854a0ca42482ebd89b710eb1a00df85212e88e799345ecf362111077883db27e
+    name: openshift-gitops
+    type: application
+    urls:
+    - https://github.com/rhpds/ocp-cluster-addons/releases/download/openshift-gitops-1.0.0/openshift-gitops-1.0.0.tgz
+    version: 1.0.0
+generated: "2024-08-30T13:16:37.053748348Z"
