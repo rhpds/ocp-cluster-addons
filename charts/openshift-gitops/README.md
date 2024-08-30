@@ -15,13 +15,13 @@ For this reason, the chart has two separate values that can be set to `true` to 
 To install the OpenShift GitOps operator, run the following command:
 
 ```shell
-helm template https://github.com/juliaaano/ocp-cluster-addons/releases/download/openshift-gitops-1.0.1/openshift-gitops-1.0.1.tgz --set operator.install=true | oc apply -f -
+helm template https://github.com/rhpds/ocp-cluster-addons/releases/download/openshift-gitops-1.0.0/openshift-gitops-1.0.0.tgz --set operator.install=true | oc apply -f -
 ```
 
 To configure the ArgoCD instance, run the following command:
 
 ```shell
-helm template https://github.com/juliaaano/ocp-cluster-addons/releases/download/openshift-gitops-1.0.1/openshift-gitops-1.0.1.tgz --set argocd.install=true | oc apply -f -
+helm template https://github.com/rhpds/ocp-cluster-addons/releases/download/openshift-gitops-1.0.0/openshift-gitops-1.0.0.tgz --set argocd.install=true | oc apply -f -
 ```
 
 ## OpenShift Console Plugin
