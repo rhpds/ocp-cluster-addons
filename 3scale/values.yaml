@@ -1,0 +1,37 @@
+# Default values for 3scale.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+namespace: 3scale
+
+# Set to empty to NOT install the Operator
+# operator: {}
+operator:
+  name: 3scale-operator
+  channel: stable
+  installPlanApproval: Automatic
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  # startingCSV: 3scale-operator.x.y.z
+
+apimanager:
+  name: apimanager
+  wildcardDomain: apps.cluster-guid.guid.sandbox.opentlc.com
+  tenantName: default
+  storageClassName: ocs-storagecluster-cephfs
+  # removeBearer:
+  #   name: remove-bearer
+  #   version: 0.1
+  #   secret: cp-bearer
+
+# Using sub-chart helper-status-checker
+helper-status-checker:
+  enabled: true
+  approver: false
+  checks:
+    - operatorName: 3scale-operator
+      namespace:
+        name: 3scale
+      syncwave: "1"
+      serviceAccount:
+        name: "3scale-status-checker"
