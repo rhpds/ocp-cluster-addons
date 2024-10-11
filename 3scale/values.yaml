@@ -8,7 +8,7 @@ namespace: 3scale
 # operator: {}
 operator:
   name: 3scale-operator
-  channel: stable
+  channel: threescale-2.14
   installPlanApproval: Automatic
   source: redhat-operators
   sourceNamespace: openshift-marketplace
@@ -23,6 +23,13 @@ apimanager:
   #   name: remove-bearer
   #   version: 0.1
   #   secret: cp-bearer
+
+apimanagerChecker:
+  name: "apimanager-checker"
+  syncwave: "3"
+  image: quay.io/agnosticd/ee-multicloud:v0.1.2
+  retries: 60
+  delay: 5
 
 # Using sub-chart helper-status-checker
 helper-status-checker:
