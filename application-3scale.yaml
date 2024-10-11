@@ -11,6 +11,8 @@ spec:
     targetRevision: main
     path: 3scale
     helm:
+      valueFiles:
+        - values-apis.yaml
       values: |
         namespace: 3scale
         operator:

@@ -31,6 +31,15 @@ apimanagerChecker:
   retries: 60
   delay: 5
 
+# Add 3scale APIs here.
+# This will configure the Product, Backend and ActiveDocs.
+# It promotes them to production.
+# apis:
+#   - name: one
+#     activeDocOpenAPIRef: https://unknown/openapi.json
+#   - name: other
+#     activeDocOpenAPIRef: https://unknown/openapi.json
+
 # Using sub-chart helper-status-checker
 helper-status-checker:
   enabled: true

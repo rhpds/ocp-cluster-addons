@@ -1,0 +1,74 @@
+{{- range .Values.apis }}
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: Backend
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  name: "{{ .name }}"
+  systemName: "{{ .name }}"
+  privateBaseURL: "http://granite-8b-code-instruct-128k-predictor.llm-hosting.svc.cluster.local:8080"
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: Product
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  name: "{{ .name }}"
+  systemName: "{{ .name }}"
+  backendUsages:
+    {{ .name }}:
+      path: /
+  {{- $sections := dict
+    "deployment" .deployment
+    "policies" .policies
+    "methods" .methods
+    "mappingRules" .mappingRules
+    "applicationPlans" .applicationPlans
+  -}}
+  {{- range $key, $value := $sections }}
+  {{- if $value }}
+  {{ $key }}:
+    {{- toYaml $value | nindent 4 }}
+  {{- end }}
+  {{- end }}
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: ActiveDoc
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  name: "{{ .name }}"
+  activeDocOpenAPIRef:
+    url: {{ .activeDocOpenAPIRef }}
+  skipSwaggerValidations: true
+  productSystemName: {{ .name }}
+  published: true
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: ProxyConfigPromote
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  productCRName: {{ .name }}
+  production: true
+  deleteCR: false
+{{- end }}
