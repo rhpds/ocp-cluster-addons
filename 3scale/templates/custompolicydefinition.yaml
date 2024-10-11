@@ -6,7 +6,7 @@ metadata:
   name: {{ .Values.apimanager.removeBearer.name }}
   namespace: {{ .Values.namespace }}
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "4"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   name: {{ .Values.apimanager.removeBearer.name }}
