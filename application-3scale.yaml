@@ -1,0 +1,38 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: 3scale
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/rhpds/ocp-cluster-addons
+    targetRevision: v1.0.1
+    path: 3scale
+    helm:
+      values: |
+        namespace: 3scale
+        operator:
+          startingCSV: 3scale-operator.v0.11.12
+          installPlanApproval: Manual
+        apimanager:
+          wildcardDomain: apps.cluster-guid.guid.sandbox.opentlc.com
+          tenantName: maas
+          removeBearer:
+            name: remove-bearer
+            version: 0.1
+            secret: cp-bearer
+        helper-status-checker:
+          approver: true
+          checks:
+            - operatorName: 3scale-operator
+              namespace:
+                name: 3scale
+              syncwave: '1'
+              serviceAccount:
+                name: "3scale-status-checker"
+  destination:
+    namespace: 3scale
+    server: https://kubernetes.default.svc
+  syncPolicy: {}
