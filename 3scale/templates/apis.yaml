@@ -80,7 +80,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "6"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
-  orgName: "Default organization for {{ .name }}"
+  orgName: "{{ .name }}"
 ---
 apiVersion: capabilities.3scale.net/v1beta1
 kind: DeveloperUser
@@ -88,7 +88,7 @@ metadata:
   name: {{ .name }}
   namespace: {{ $.Values.namespace }}
   annotations:
-    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-wave: "7"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   username: {{ .name }}
@@ -105,7 +105,7 @@ metadata:
   name: {{ .name }}
   namespace: {{ $.Values.namespace }}
   annotations:
-    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-wave: "8"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   name: {{ .name }}
@@ -122,7 +122,7 @@ metadata:
   name: {{ .name }}
   namespace: {{ $.Values.namespace }}
   annotations:
-    argocd.argoproj.io/sync-wave: "7"
+    argocd.argoproj.io/sync-wave: "9"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
