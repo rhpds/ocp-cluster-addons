@@ -11,7 +11,7 @@ metadata:
 spec:
   name: "{{ .name }}"
   systemName: "{{ .name }}"
-  privateBaseURL: "http://granite-8b-code-instruct-128k-predictor.llm-hosting.svc.cluster.local:8080"
+  privateBaseURL: "{{ .backend.privateBaseURL }}"
 ---
 apiVersion: capabilities.3scale.net/v1beta1
 kind: Product
@@ -26,13 +26,12 @@ spec:
   systemName: "{{ .name }}"
   backendUsages:
     {{ .name }}:
-      path: /
+      path: {{ .backend.path }}
   {{- $sections := dict
     "deployment" .deployment
     "policies" .policies
     "methods" .methods
     "mappingRules" .mappingRules
-    "applicationPlans" .applicationPlans
   -}}
   {{- range $key, $value := $sections }}
   {{- if $value }}
@@ -40,6 +39,10 @@ spec:
     {{- toYaml $value | nindent 4 }}
   {{- end }}
   {{- end }}
+  applicationPlans:
+    standard:
+      name: "Standard Plan"
+      published: true
 ---
 apiVersion: capabilities.3scale.net/v1beta1
 kind: ActiveDoc
@@ -57,13 +60,69 @@ spec:
   productSystemName: {{ .name }}
   published: true
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .name }}-pwd
+  namespace: {{ $.Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+stringData:
+  password: {{ .name }}
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: DeveloperAccount
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  orgName: "Default organization for {{ .name }}"
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: DeveloperUser
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  username: {{ .name }}
+  email: {{ .name }}@domain.com
+  role: admin
+  passwordCredentialsRef:
+    name: {{ .name }}-pwd
+  developerAccountRef:
+    name: {{ .name }}
+---
+apiVersion: capabilities.3scale.net/v1beta1
+kind: Application
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  name: {{ .name }}
+  description: "Default application for {{ .name }}"
+  applicationPlanName: standard
+  productCR:
+    name: {{ .name }}
+  accountCR:
+    name: {{ .name }}
+---
 apiVersion: capabilities.3scale.net/v1beta1
 kind: ProxyConfigPromote
 metadata:
   name: {{ .name }}
   namespace: {{ $.Values.namespace }}
   annotations:
-    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-wave: "7"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded

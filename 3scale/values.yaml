@@ -37,6 +37,9 @@ apimanagerChecker:
 # apis:
 #   - name: one
 #     activeDocOpenAPIRef: https://unknown/openapi.json
+#     backend:
+#       privateBaseURL: http://service.namespace.svc.cluster.local:8080
+#       path: /
 #   - name: other
 #     activeDocOpenAPIRef: https://unknown/openapi.json
 
