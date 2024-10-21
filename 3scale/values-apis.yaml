@@ -78,7 +78,7 @@ apis:
         pattern: "/v1/embeddings"
         metricMethodRef: embeddings
         increment: 1
-  - name: mistral-7B-instruct-v0-3
+  - name: mistral-7b-instruct-v0-3
     activeDocOpenAPIRef: https://raw.githubusercontent.com/redhat-gpte-devopsautomation/llm-aas/refs/heads/main/bootstrap/3scale/api_definitions/mistral-7b-instruct-v0.3.json
     backend:
       privateBaseURL: http://mistral-7b-instruct-predictor.llm-hosting.svc.cluster.local:8080
