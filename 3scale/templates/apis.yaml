@@ -59,62 +59,64 @@ spec:
   skipSwaggerValidations: true
   productSystemName: {{ .name }}
   published: true
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: {{ .name }}-pwd
-  namespace: {{ $.Values.namespace }}
-  annotations:
-    argocd.argoproj.io/sync-wave: "6"
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-stringData:
-  password: {{ .name }}
----
-apiVersion: capabilities.3scale.net/v1beta1
-kind: DeveloperAccount
-metadata:
-  name: {{ .name }}
-  namespace: {{ $.Values.namespace }}
-  annotations:
-    argocd.argoproj.io/sync-wave: "3"
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-spec:
-  orgName: "{{ .name }}"
----
-apiVersion: capabilities.3scale.net/v1beta1
-kind: DeveloperUser
-metadata:
-  name: {{ .name }}
-  namespace: {{ $.Values.namespace }}
-  annotations:
-    argocd.argoproj.io/sync-wave: "7"
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-spec:
-  username: {{ .name }}
-  email: {{ .name }}@domain.com
-  role: admin
-  passwordCredentialsRef:
-    name: {{ .name }}-pwd
-  developerAccountRef:
-    name: {{ .name }}
----
-apiVersion: capabilities.3scale.net/v1beta1
-kind: Application
-metadata:
-  name: {{ .name }}
-  namespace: {{ $.Values.namespace }}
-  annotations:
-    argocd.argoproj.io/sync-wave: "8"
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-spec:
-  name: {{ .name }}
-  description: "Default application for {{ .name }}"
-  applicationPlanName: standard
-  productCR:
-    name: {{ .name }}
-  accountCR:
-    name: {{ .name }}
+# Creating an application is failing with ArgoCD because it needs proper waiting
+# time for DeveloperAccount and DeveloperUser to be created.
+# ---
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: {{ .name }}-pwd
+#   namespace: {{ $.Values.namespace }}
+#   annotations:
+#     argocd.argoproj.io/sync-wave: "6"
+#     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+# stringData:
+#   password: {{ .name }}
+# ---
+# apiVersion: capabilities.3scale.net/v1beta1
+# kind: DeveloperAccount
+# metadata:
+#   name: {{ .name }}
+#   namespace: {{ $.Values.namespace }}
+#   annotations:
+#     argocd.argoproj.io/sync-wave: "3"
+#     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+# spec:
+#   orgName: "{{ .name }}"
+# ---
+# apiVersion: capabilities.3scale.net/v1beta1
+# kind: DeveloperUser
+# metadata:
+#   name: {{ .name }}
+#   namespace: {{ $.Values.namespace }}
+#   annotations:
+#     argocd.argoproj.io/sync-wave: "7"
+#     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+# spec:
+#   username: {{ .name }}
+#   email: {{ .name }}@domain.com
+#   role: admin
+#   passwordCredentialsRef:
+#     name: {{ .name }}-pwd
+#   developerAccountRef:
+#     name: {{ .name }}
+# ---
+# apiVersion: capabilities.3scale.net/v1beta1
+# kind: Application
+# metadata:
+#   name: {{ .name }}
+#   namespace: {{ $.Values.namespace }}
+#   annotations:
+#     argocd.argoproj.io/sync-wave: "8"
+#     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+# spec:
+#   name: {{ .name }}
+#   description: "Default application for {{ .name }}"
+#   applicationPlanName: standard
+#   productCR:
+#     name: {{ .name }}
+#   accountCR:
+#     name: {{ .name }}
 ---
 apiVersion: capabilities.3scale.net/v1beta1
 kind: ProxyConfigPromote
@@ -124,8 +126,6 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "9"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/hook-delete-policy: HookSucceeded
 spec:
   productCRName: {{ .name }}
   production: true
