@@ -5,7 +5,7 @@
 namespace: rhsso
 
 # Set to empty to NOT install the Operator
-# operator: {}
+# operator: ''
 operator:
   name: rhsso-operator
   channel: stable

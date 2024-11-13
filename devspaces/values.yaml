@@ -5,7 +5,7 @@
 namespace: openshift-operators
 
 # Set to empty to NOT install the Operator
-# operator: {}
+# operator: ''
 operator:
   name: devspaces
   channel: stable
@@ -15,7 +15,7 @@ operator:
   # startingCSV: devspacesoperator.x.y.z
 
 # Set to empty to NOT install CheCluster
-# checluster: {}
+# checluster: ''
 checluster:
   name: devspaces
   components: {}

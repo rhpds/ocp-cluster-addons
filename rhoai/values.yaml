@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 # Set to empty to NOT install the Operator
-# operator: {}
+# operator: ''
 operator:
   name: rhods-operator
   namespace: redhat-ods-operator
@@ -14,7 +14,7 @@ operator:
   # startingCSV: rhods-operator.x.y.x
 
 # Set to empty to NOT install DataScienceCluster
-# datasciencecluster: {}
+# datasciencecluster: ''
 datasciencecluster:
   name: default-dsc
   components:

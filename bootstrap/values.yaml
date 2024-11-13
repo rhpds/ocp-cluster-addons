@@ -11,7 +11,7 @@ git:
   revision: main
 
 # Set to empty to NOT install the 3scale
-# threeScale: {}
+# threeScale: ''
 threeScale:
   path: 3scale
   namespace: 3scale
@@ -19,21 +19,21 @@ threeScale:
   # startingCSV: 3scale-operator.x.y.z
 
 # Set to empty to NOT install the devspaces
-# devspaces: {}
+# devspaces: ''
 devspaces:
   path: devspaces
   namespace: openshift-operators
   # startingCSV: devspacesoperator.x.y.z
 
 # Set to empty to NOT install the rhoai
-# rhoai: {}
+# rhoai: ''
 rhoai:
   path: rhoai
   namespace: redhat-ods-operator
   # startingCSV: rhods-operator.x.y.z
 
 # Set to empty to NOT install the rhsso
-# rhsso: {}
+# rhsso: ''
 rhsso:
   path: rhsso
   namespace: rhsso

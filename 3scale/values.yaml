@@ -5,7 +5,7 @@
 namespace: 3scale
 
 # Set to empty to NOT install the Operator
-# operator: {}
+# operator: ''
 operator:
   name: 3scale-operator
   channel: threescale-2.14
