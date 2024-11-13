@@ -31,5 +31,4 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.devspaces.namespace }}
-  syncPolicy: {}
 {{- end }}

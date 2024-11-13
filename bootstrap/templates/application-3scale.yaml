@@ -40,5 +40,4 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.threeScale.namespace }}
-  syncPolicy: {}
 {{- end }}

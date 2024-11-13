@@ -39,5 +39,4 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .Values.rhsso.namespace }}
-  syncPolicy: {}
 {{- end }}
