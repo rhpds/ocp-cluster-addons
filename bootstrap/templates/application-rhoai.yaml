@@ -1,3 +1,4 @@
+{{ if .Values.rhoai -}}
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -7,14 +8,16 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/rhpds/ocp-cluster-addons
-    targetRevision: v1.0.0
-    path: rhoai
+    repoURL: {{ .Values.git.url }}
+    targetRevision: {{ .Values.git.revision }}
+    path: {{ .Values.rhoai.path }}
     helm:
       values: |
         operator:
-          namespace: redhat-ods-operator
-          startingCSV: rhods-operator.2.10.0
+          namespace: {{ .Values.rhoai.namespace }}
+          {{- if .Values.rhoai.startingCSV }}
+          startingCSV: {{ .Values.rhoai.startingCSV }}
+          {{- end }}
           installPlanApproval: Manual
         datasciencecluster:
           components:
@@ -39,11 +42,12 @@ spec:
           checks:
             - operatorName: rhods-operator
               namespace:
-                name: redhat-ods-operator
+                name: {{ .Values.rhoai.namespace }}
               syncwave: '1'
               serviceAccount:
                 name: "rhoai-status-checker"
   destination:
-    namespace: redhat-ods-operator
     server: https://kubernetes.default.svc
+    namespace: {{ .Values.rhoai.namespace }}
   syncPolicy: {}
+{{- end }}

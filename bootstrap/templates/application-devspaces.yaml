@@ -1,3 +1,4 @@
+{{ if .Values.devspaces -}}
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -7,25 +8,28 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/rhpds/ocp-cluster-addons
-    targetRevision: v1.0.0
-    path: devspaces
+    repoURL: {{ .Values.git.url }}
+    targetRevision: {{ .Values.git.revision }}
+    path: {{ .Values.devspaces.path }}
     helm:
       values: |
-        namespace: openshift-operators
+        namespace: {{ .Values.devspaces.namespace }}
         operator:
-          startingCSV: devspacesoperator.v3.15.0
+          {{- if .Values.devspaces.startingCSV }}
+          startingCSV: {{ .Values.devspaces.startingCSV }}
+          {{- end }}
           installPlanApproval: Manual
         helper-status-checker:
           approver: true
           checks:
             - operatorName: devspaces
               namespace:
-                name: openshift-operators
+                name: {{ .Values.devspaces.namespace }}
               syncwave: '1'
               serviceAccount:
                 name: "devspaces-status-checker"
   destination:
-    namespace: openshift-operators
     server: https://kubernetes.default.svc
+    namespace: {{ .Values.devspaces.namespace }}
   syncPolicy: {}
+{{- end }}

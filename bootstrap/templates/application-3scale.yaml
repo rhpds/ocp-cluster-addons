@@ -1,3 +1,4 @@
+{{ if .Values.threeScale -}}
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -7,20 +8,22 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/rhpds/ocp-cluster-addons
-    targetRevision: main
-    path: 3scale
+    repoURL: {{ .Values.git.url }}
+    targetRevision: {{ .Values.git.revision }}
+    path: {{ .Values.threeScale.path }}
     helm:
-      valueFiles:
-        - values-apis.yaml
+      # valueFiles:
+      #   - values-apis.yaml
       values: |
-        namespace: 3scale
+        namespace: {{ .Values.threeScale.namespace }}
         operator:
-          startingCSV: 3scale-operator.v0.11.12
+          {{- if .Values.threeScale.startingCSV }}
+          startingCSV: {{ .Values.threeScale.startingCSV }}
+          {{- end }}
           installPlanApproval: Manual
         apimanager:
-          wildcardDomain: apps.cluster-guid.guid.sandbox.opentlc.com
-          tenantName: maas
+          wildcardDomain: {{ .Values.deployer.domain }}
+          tenantName: demo
           removeBearer:
             name: remove-bearer
             version: 0.1
@@ -30,11 +33,12 @@ spec:
           checks:
             - operatorName: 3scale-operator
               namespace:
-                name: 3scale
+                name: {{ .Values.threeScale.namespace }}
               syncwave: '1'
               serviceAccount:
                 name: "3scale-status-checker"
   destination:
-    namespace: 3scale
     server: https://kubernetes.default.svc
+    namespace: {{ .Values.threeScale.namespace }}
   syncPolicy: {}
+{{- end }}
