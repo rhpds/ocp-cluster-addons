@@ -17,6 +17,7 @@ spec:
       values: |
         namespace: {{ .Values.threeScale.namespace }}
         operator:
+          channel: {{ .Values.threeScale.channel }}
           {{- if .Values.threeScale.startingCSV }}
           startingCSV: {{ .Values.threeScale.startingCSV }}
           {{- end }}

@@ -15,6 +15,7 @@ git:
 threeScale:
   path: 3scale
   namespace: 3scale
+  channel: threescale-2.14
   # startingCSV: 3scale-operator.x.y.z
 
 # Set to empty to NOT install the devspaces
