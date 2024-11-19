@@ -52,7 +52,7 @@ data:
           namespace: "{{ .Values.patcher.namespace }}"
           definition:
             spec:
-              replicas: "{{ .Values.patcher.dashboard.replicas }}"
+              replicas: {{ .Values.patcher.dashboard.replicas | int }}
 
 ---
 apiVersion: batch/v1
