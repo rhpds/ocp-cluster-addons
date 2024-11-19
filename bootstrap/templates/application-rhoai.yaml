@@ -19,24 +19,14 @@ spec:
           startingCSV: {{ .Values.rhoai.startingCSV }}
           {{- end }}
           installPlanApproval: Manual
+        {{- if hasKey .Values.rhoai "datasciencecluster" }}
+        {{- if and (typeIs "string" .Values.rhoai.datasciencecluster) (eq .Values.rhoai.datasciencecluster "") }}
+        datasciencecluster: ''
+        {{- else }}
         datasciencecluster:
-          components:
-            codeflare:
-              managementState: Managed
-            dashboard:
-              managementState: Managed
-            datasciencepipelines:
-              managementState: Managed
-            kserve:
-              managementState: Managed  
-            kueue:
-              managementState: Managed
-            modelmeshserving:
-              managementState: Managed
-            ray:
-              managementState: Managed
-            workbenches:
-              managementState: Managed
+          {{ .Values.rhoai.datasciencecluster | toYaml | nindent 10 | trim }}
+        {{- end }}
+        {{- end }}
         helper-status-checker:
           approver: true
           checks:

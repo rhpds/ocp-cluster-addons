@@ -31,6 +31,16 @@ rhoai:
   path: rhoai
   namespace: redhat-ods-operator
   # startingCSV: rhods-operator.x.y.z
+  # Set to empty to NOT install the datasciencecluster
+  # Not defining the key installs the datasciencecluster
+  # using the chart defaults (see rhoai/values.yaml)
+  # datasciencecluster: ''
+  # datasciencecluster:
+  #   components:
+  #     dashboard:
+  #       managementState: Managed
+  #     workbenches:
+  #       managementState: Managed
 
 # Set to empty to NOT install the rhsso
 # rhsso: ''
