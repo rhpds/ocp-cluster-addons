@@ -1,0 +1,85 @@
+{{ if .Values.patcher.dashboard -}}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.patcher.name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "{{ .Values.patcher.syncwave }}"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Values.patcher.name }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "{{ .Values.patcher.syncwave }}"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.patcher.name }}
+  namespace: {{ .Values.namespace }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.patcher.name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "{{ .Values.patcher.syncwave }}"
+data:
+  playbook.yaml: |
+    ---
+    - name: rhoai patcher
+      hosts: localhost
+      connection: local
+      gather_facts: false
+      tasks:
+      - name: patch rhods-dashboard replicas to {{ .Values.patcher.dashboard.replicas }}
+        kubernetes.core.k8s:
+          state: patched
+          kind: Deployment
+          name: rhods-dashboard
+          namespace: "{{ .Values.namespace }}"
+          definition:
+            spec:
+              replicas: "{{ .Values.patcher.dashboard.replicas }}"
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.patcher.name }}
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "{{ .Values.patcher.syncwave }}"
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      serviceAccountName: {{ .Values.patcher.name }}
+      restartPolicy: Never
+      containers:
+      - name: ansible
+        image: {{ .Values.patcher.image }}
+        command: ["ansible-playbook"]
+        args: ["/ansible/playbook.yaml"]
+        volumeMounts:
+        - name: ansible
+          mountPath: /ansible
+      volumes:
+      - name: ansible
+        configMap:
+          name: {{ .Values.patcher.name }}
+{{- end }}

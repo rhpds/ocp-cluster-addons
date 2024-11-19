@@ -4,13 +4,13 @@ apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:
   name: {{ .Values.operator.name }}
-  namespace: {{ .Values.operator.namespace }}
+  namespace: {{ .Values.namespace }}
 ---
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
   name: {{ .Values.operator.name }}
-  namespace: {{ .Values.operator.namespace }}
+  namespace: {{ .Values.namespace }}
 spec:
   channel: {{ .Values.operator.channel }}
   installPlanApproval: {{ .Values.operator.installPlanApproval }}

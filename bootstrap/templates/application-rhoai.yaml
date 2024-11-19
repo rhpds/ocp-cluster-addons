@@ -13,8 +13,8 @@ spec:
     path: {{ .Values.rhoai.path }}
     helm:
       values: |
+        namespace: {{ .Values.rhoai.namespace }}
         operator:
-          namespace: {{ .Values.rhoai.namespace }}
           {{- if .Values.rhoai.startingCSV }}
           startingCSV: {{ .Values.rhoai.startingCSV }}
           {{- end }}
@@ -27,6 +27,9 @@ spec:
           {{ .Values.rhoai.datasciencecluster | toYaml | nindent 10 | trim }}
         {{- end }}
         {{- end }}
+        patcher:
+          dashboard:
+            replicas: 1
         helper-status-checker:
           approver: true
           checks:
