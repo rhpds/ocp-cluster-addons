@@ -13,8 +13,8 @@ spec:
     path: {{ .Values.rhoai.path }}
     helm:
       values: |
-        namespace: {{ .Values.rhoai.namespace }}
         operator:
+          namespace: {{ .Values.rhoai.namespace }}
           {{- if .Values.rhoai.startingCSV }}
           startingCSV: {{ .Values.rhoai.startingCSV }}
           {{- end }}
@@ -28,6 +28,7 @@ spec:
         {{- end }}
         {{- end }}
         patcher:
+          namespace: redhat-ods-applications
           dashboard:
             replicas: 1
         helper-status-checker:

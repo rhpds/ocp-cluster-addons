@@ -2,12 +2,11 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-namespace: redhat-ods-operator
-
 # Set to empty to NOT install the Operator
 # operator: ''
 operator:
   name: rhods-operator
+  namespace: redhat-ods-operator
   channel: stable
   installPlanApproval: Automatic
   source: redhat-operators
@@ -42,6 +41,7 @@ datasciencecluster:
 
 patcher:
   name: rhoai-patcher
+  namespace: redhat-ods-applications
   syncwave: "3"
   image: quay.io/agnosticd/ee-multicloud:v0.1.2
   # dashboard:
