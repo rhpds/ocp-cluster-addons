@@ -62,7 +62,6 @@ metadata:
   namespace: {{ .Values.namespace }}
   annotations:
     argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/hook-delete-policy: HookSucceeded
     argocd.argoproj.io/sync-wave: "{{ .Values.patcher.syncwave }}"
 spec:
   backoffLimit: 3
