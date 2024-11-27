@@ -51,3 +51,9 @@ rhsso:
   admin:
     username: ssoadmin
     password: r3dh4t1!
+
+# Set to empty to NOT install the web-terminal
+# webterminal: ''
+webterminal:
+  path: webterminal
+  # startingCSV: web-terminal.x.y.z

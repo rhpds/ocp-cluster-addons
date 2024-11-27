@@ -1,0 +1,23 @@
+{{ if .Values.webterminal -}}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: webterminal
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.git.url }}
+    targetRevision: {{ .Values.git.revision }}
+    path: {{ .Values.webterminal.path }}
+    helm:
+      values: |
+        operator:
+          {{- if .Values.webterminal.startingCSV }}
+          startingCSV: {{ .Values.webterminal.startingCSV }}
+          {{- end }}
+          installPlanApproval: Manual
+  destination:
+    server: https://kubernetes.default.svc
+{{- end }}

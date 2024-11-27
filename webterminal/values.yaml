@@ -1,0 +1,26 @@
+# Default values for webterminal.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Set to empty to NOT install the Operator
+# operator: ''
+operator:
+  name: web-terminal
+  namespace: openshift-operators
+  channel: fast
+  installPlanApproval: Automatic
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  # startingCSV: web-terminal.x.y.z
+
+# Using sub-chart helper-status-checker
+helper-status-checker:
+  enabled: true
+  approver: false
+  checks:
+    - operatorName: web-terminal
+      namespace:
+        name: openshift-operators
+      syncwave: '1'
+      serviceAccount:
+        name: "webterminal-status-checker"
