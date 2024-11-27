@@ -18,6 +18,8 @@ spec:
           startingCSV: {{ .Values.webterminal.startingCSV }}
           {{- end }}
           installPlanApproval: Manual
+        helper-status-checker:
+          approver: true
   destination:
     server: https://kubernetes.default.svc
 {{- end }}
