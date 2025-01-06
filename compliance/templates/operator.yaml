@@ -12,7 +12,8 @@ apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:
   name: compliance-operator
-  namespace: {{ .Values.operator.namespace }}
+  namespace: openshift-compliance
+  # namespace: {{ .Values.operator.namespace }}
 spec:
   targetNamespaces:
   - {{ .Values.operator.namespace }}
@@ -32,6 +33,7 @@ spec:
   startingCSV: {{ .Values.operator.startingCSV }}
   {{- end }}
   {{- if .Values.operator.config }}
-  {{ .Values.operator.config }}
+  config:
+  {{- .Values.operator.config | toYaml | nindent 4 }}
   {{- end }}
 {{- end }}
