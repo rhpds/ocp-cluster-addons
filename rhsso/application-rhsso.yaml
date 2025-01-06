@@ -1,0 +1,38 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rhsso
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: this
+    targetRevision: main
+    path: rhsso
+    helm:
+      values: |
+        namespace: rhsso
+        operator:
+          startingCSV: rhsso-operator.x.y.z
+          installPlanApproval: Manual
+        users:
+          - username: ssoadmin
+            password: password
+            email: ssoadmin@rhdp.com
+            admin: true
+            realm: rhdp
+        oauth:
+          issuer: https://keycloak-rhsso.apps.cluster-guid.guid.sandbox.opentlc.com/auth/realms/rhdp
+        helper-status-checker:
+          approver: true
+          checks:
+            - operatorName: rhsso-operator
+              namespace:
+                name: rhsso
+              syncwave: '1'
+              serviceAccount:
+                name: "rhsso-status-checker"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: rhsso

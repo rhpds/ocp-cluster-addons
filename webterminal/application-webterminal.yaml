@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: webterminal
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: this
+    targetRevision: main
+    path: webterminal
+    helm:
+      values: |
+        operator:
+          startingCSV: web-terminal.x.y.z
+          installPlanApproval: Manual
+        helper-status-checker:
+          approver: true
+  destination:
+    server: https://kubernetes.default.svc

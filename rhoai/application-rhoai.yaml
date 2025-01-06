@@ -1,0 +1,51 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rhoai
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: this
+    targetRevision: main
+    path: rhoai
+    helm:
+      values: |
+        operator:
+          namespace: redhat-ods-operator
+          startingCSV: rhods-operator.x.y.z
+          installPlanApproval: Manual
+        datasciencecluster:
+          components:
+            codeflare:
+              managementState: Managed
+            dashboard:
+              managementState: Managed
+            datasciencepipelines:
+              managementState: Managed
+            kserve:
+              managementState: Managed  
+            kueue:
+              managementState: Managed
+            modelmeshserving:
+              managementState: Managed
+            ray:
+              managementState: Managed
+            workbenches:
+              managementState: Managed
+        patcher:
+          namespace: redhat-ods-applications
+          dashboard:
+            replicas: 1
+        helper-status-checker:
+          checks:
+            - operatorName: rhods-operator
+              namespace:
+                name: redhat-ods-operator
+              syncwave: '1'
+              serviceAccount:
+                name: "rhoai-status-checker"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: redhat-ods-operator

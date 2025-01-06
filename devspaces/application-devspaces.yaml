@@ -1,0 +1,30 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: devspaces
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: this
+    targetRevision: main
+    path: devspaces
+    helm:
+      values: |
+        namespace: openshift-operators
+        operator:
+          startingCSV: devspacesoperator.x.y.z
+          installPlanApproval: Manual
+        helper-status-checker:
+          approver: true
+          checks:
+            - operatorName: devspaces
+              namespace:
+                name: openshift-operators
+              syncwave: '1'
+              serviceAccount:
+                name: "devspaces-status-checker"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openshift-operators
