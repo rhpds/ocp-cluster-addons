@@ -1,0 +1,39 @@
+{{ if .Values.operator -}}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    openshift.io/cluster-monitoring: "true"
+    pod-security.kubernetes.io/enforce: privileged
+  name: {{ .Values.operator.namespace }}
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: compliance-operator
+  namespace: openshift-compliance
+  # namespace: {{ .Values.operator.namespace }}
+spec:
+  targetNamespaces:
+  - {{ .Values.operator.namespace }}
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: {{ .Values.operator.name }}
+  namespace: {{ .Values.operator.namespace }}
+spec:
+  channel: {{ .Values.operator.channel }}
+  installPlanApproval: {{ .Values.operator.installPlanApproval }}
+  name: {{ .Values.operator.name }}
+  source: {{ .Values.operator.source }}
+  sourceNamespace: {{ .Values.operator.sourceNamespace }}
+  {{- if .Values.operator.startingCSV }}
+  startingCSV: {{ .Values.operator.startingCSV }}
+  {{- end }}
+  {{- if .Values.operator.config }}
+  config:
+  {{- .Values.operator.config | toYaml | nindent 4 }}
+  {{- end }}
+{{- end }}

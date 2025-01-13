@@ -1,0 +1,32 @@
+# Default values for compliance-operator.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Set to empty to NOT install the Operator
+# operator: ''
+operator:
+  name: compliance-operator
+  namespace: openshift-compliance
+  channel: "stable"
+  installPlanApproval: Automatic
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  startingCSV: compliance-operator.v1.6.1
+  config:
+    nodeSelector:
+      node-role.kubernetes.io/worker: ""
+    #  NOTE: hypershift only
+    # env:
+    # - name: PLATFORM
+    #   value: "HyperShift"
+# Using sub-chart helper-status-checker
+helper-status-checker:
+  enabled: true
+  approver: false
+  checks:
+    - operatorName: compliance-operator
+      namespace:
+        name: openshift-compliance
+      syncwave: '1'
+      serviceAccount:
+        name: "compliance-status-checker"
