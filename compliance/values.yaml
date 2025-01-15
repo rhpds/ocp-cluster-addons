@@ -11,7 +11,7 @@ operator:
   installPlanApproval: Automatic
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  startingCSV: compliance-operator.v1.6.1
+  # startingCSV: compliance-operator.x.y.z
   config:
     nodeSelector:
       node-role.kubernetes.io/worker: ""

@@ -1,0 +1,36 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: compliance
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: this
+    targetRevision: main
+    path: compliance
+    helm:
+      values: |
+        operator:
+          namespace: openshift-compliance
+          startingCSV: compliance-operator.x.y.z
+          installPlanApproval: Manual
+          config:
+            nodeSelector:
+              node-role.kubernetes.io/worker: ""
+              env:
+              - name: PLATFORM
+                value: "HyperShift"
+        helper-status-checker:
+          approver: true
+          checks:
+            - operatorName: compliance-operator
+              namespace:
+                name: openshift-compliance
+              syncwave: '1'
+              serviceAccount:
+                name: "compliance-status-checker"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openshift-compliance
