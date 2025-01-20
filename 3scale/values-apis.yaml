@@ -1,6 +1,6 @@
 
 apis:
-  - name: GRANITE-8BILLION-CODE-INSTRUCT
+  - name: granite-8b-code-instruct
     activeDocOpenAPIRef: https://raw.githubusercontent.com/redhat-gpte-devopsautomation/llm-aas/refs/heads/main/bootstrap/3scale/api_definitions/granite-8b-code-instruct.json
     backend:
       privateBaseURL: http://granite-8b-code-instruct-128k-predictor.llm-hosting.svc.cluster.local:8080
@@ -78,7 +78,7 @@ apis:
         pattern: "/v1/embeddings"
         metricMethodRef: embeddings
         increment: 1
-  - name: MISTRAL-7BILLION-INSTRUCT-v0-3
+  - name: mistral-7b-instruct-v0-3
     activeDocOpenAPIRef: https://raw.githubusercontent.com/redhat-gpte-devopsautomation/llm-aas/refs/heads/main/bootstrap/3scale/api_definitions/mistral-7b-instruct-v0.3.json
     backend:
       privateBaseURL: http://mistral-7b-instruct-predictor.llm-hosting.svc.cluster.local:8080
