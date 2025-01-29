@@ -1,0 +1,20 @@
+# Default values for showroom.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+content:
+  repoUrl: https://github.com/rhpds/showroom_template_default
+  repoRef: main
+
+showroom:
+  namespace: showroom
+  repoUrl: https://github.com/rhpds/showroom-deployer
+  repoRef: main
+
+deployer:
+  domain: apps.domain.example.com
+  apiUrl: https://api.cluster.opentlc.com:6443
+
+user:
+  base: user
+  count: "2"

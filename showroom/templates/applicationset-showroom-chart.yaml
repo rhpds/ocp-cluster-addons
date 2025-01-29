@@ -1,0 +1,53 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: showroom-appset
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "3" # TODO: need to make this syncwave in concert with other addons
+spec:
+  goTemplate: true
+  # goTempalteOptions: ["missingkey=error"]
+  generators:
+    - list:
+        elements:
+        {{- $max_users := ( add ( int .Values.user.count ) 1 ) -}}
+        {{- range $user_index := untilStep 1 ( int $max_users ) 1 }}
+          - index: {{ $user_index }}
+        {{- end }}
+  template:
+    metadata:
+      {{- if eq .Values.user.count "1" }}
+      name: showroom
+      {{- else }}
+      name: showroom-{{.Values.user.base}}{{`{{.index}}`}}
+      {{- end }}
+      finalizers:
+      - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      source:
+        repoURL: {{ .Values.showroom.repoUrl }}
+        targetRevision: {{ .Values.showroom.repoRef }}
+        path: charts/showroom-single-pod
+        helm:
+          values: |
+            deployer:
+              domain: {{ .Values.deployer.domain }}
+            content:
+              repoUrl: {{ .Values.content.repoUrl }}
+              repoRef: {{ .Values.content.repoRef }}
+      destination:
+        server: 'https://kubernetes.default.svc'
+        {{- if eq .Values.user.count "1" }}
+        namespace: {{ .Values.showroom.namespace }}
+        {{- else }}
+        namespace: {{ .Values.showroom.namespace }}-{{.Values.user.base}}{{`{{.index}}`}}
+        {{- end }}
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
