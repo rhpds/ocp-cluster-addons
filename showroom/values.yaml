@@ -1,0 +1,17 @@
+# Default values for showroom.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+showroom:
+  content:
+    repoUrl: https://github.com/rhpds/showroom_template_default
+    repoRef: main
+  user_num: 1
+  namespace: showroom
+
+deployer:
+  domain: apps.ingress-controller-domain
+  apiUrl: https://api.cluster.opentlc.com:6443
+
+user:
+  base: user
