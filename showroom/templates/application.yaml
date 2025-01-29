@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: showroom-single-pod
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/rhpds/showroom-deployer'
+    targetRevision: HEAD
+    path: charts/showroom-single-pod
+    helm:
+      values: |
+        deployer:
+          domain: {{ .Values.deployer.domain }}
+        content:
+          repoUrl: {{ .Values.showroom.content.repoUrl }}
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: {{ .Values.showroom.namespace }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
