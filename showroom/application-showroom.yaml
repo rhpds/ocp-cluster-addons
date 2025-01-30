@@ -1,23 +1,26 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: {{ .Values.showroom.app_name }}
+  name: showroom-apps
   namespace: openshift-gitops
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/rhpds/showroom-deployer'
-    targetRevision: HEAD
-    path: charts/showroom-single-pod
+    repoURL: 'https://github.com/rhpds/ocp-cluster-addons.git'
+    targetRevision: showroom
+    path: showroom
     helm:
       values: |
+        user:
+          count: "{{ .Values.user.count }}"
         deployer:
           domain: {{ .Values.deployer.domain }}
         content:
-          repoUrl: {{ .Values.showroom.content.repoUrl }}
+          repoUrl: {{ .Values.content.repoUrl }}
+          repoRef: main
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: {{ .Values.showroom.namespace }}
+    namespace: openshift-gitops
   syncPolicy:
     automated:
       prune: true
