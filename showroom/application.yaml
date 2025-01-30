@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: showroom-single-pod
+  name: {{ .Values.showroom.app_name }}
   namespace: openshift-gitops
 spec:
   project: default
