@@ -27,8 +27,8 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/rhpds/showroom-deployer.git
-        targetRevision: main
+        repoURL: {{ .Values.showroom.repoUrl }}
+        targetRevision: {{ .Values.showroom.repoRef }}
         path: charts/showroom-single-pod
         helm:
           values: |
