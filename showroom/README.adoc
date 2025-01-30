@@ -18,6 +18,8 @@ To use this Helm chart with ArgoCD, you can refer to the [application-showroom.y
 
 === Reference Values from AgD
 
+We are not copying this, just using it as a reminder
+
 [,yaml]
 ----
 - name: Render helm chart with values
