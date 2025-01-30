@@ -17,7 +17,7 @@ spec:
           domain: {{ .Values.deployer.domain }}
         content:
           repoUrl: {{ .Values.content.repoUrl }}
-          repoRef: main
+          repoRef:  {{ .Values.content.repoRef }}
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: openshift-gitops

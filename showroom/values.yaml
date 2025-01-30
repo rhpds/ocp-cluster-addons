@@ -8,6 +8,8 @@ content:
 
 showroom:
   namespace: showroom
+  repoUrl: https://github.com/rhpds/showroom-deployer
+  repoRef: main
 
 deployer:
   domain: apps.domain.example.com
