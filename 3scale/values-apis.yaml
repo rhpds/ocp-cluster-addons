@@ -28,6 +28,13 @@ apis:
         enabled: true
         version: builtin
         configuration: {}
+      - name: upstream_connection
+        enabled: true
+        version: builtin
+        configuration:
+          connect_timeout: 180
+          send_timeout: 180
+          read_timeout: 180
     methods:
       health:
         friendlyName: Health
@@ -106,6 +113,13 @@ apis:
         enabled: true
         version: builtin
         configuration: {}
+      - name: upstream_connection
+        enabled: true
+        version: builtin
+        configuration:
+          connect_timeout: 180
+          send_timeout: 180
+          read_timeout: 180
     methods:
       health:
         friendlyName: Health

@@ -25,7 +25,7 @@ datasciencecluster:
     datasciencepipelines:
       managementState: Removed
     kserve:
-      managementState: Removed  
+      managementState: Removed
     kueue:
       managementState: Removed
     modelmeshserving:
