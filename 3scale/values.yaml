@@ -43,6 +43,17 @@ apimanagerChecker:
 #   - name: other
 #     activeDocOpenAPIRef: https://unknown/openapi.json
 
+patcher:
+  name: 3scale-patcher
+  namespace: 3scale
+  image: quay.io/agnosticd/ee-multicloud:v0.1.2
+  # routes:
+  #   label_selectors:
+  #   - "zync.3scale.net/route-to=apicast-production"
+  #   - "zync.3scale.net/route-to=apicast-staging"
+  #   annotations:
+  #     haproxy.router.openshift.io/timeout: "180s"
+
 # Using sub-chart helper-status-checker
 helper-status-checker:
   enabled: true
