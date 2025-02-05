@@ -4,6 +4,8 @@ kind: ApplicationSet
 metadata:
   name: showroom-appset
   namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "3" # TODO: need to make this syncwave in concert with other addons
 spec:
   goTemplate: true
   # goTempalteOptions: ["missingkey=error"]
