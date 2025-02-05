@@ -49,7 +49,7 @@ data:
           namespace: "{{ .Values.patcher.namespace }}"
           label_selectors:
           {{- toYaml .Values.patcher.routes.label_selectors | nindent 10 }}
-          patch:
+          definition:
             metadata:
               annotations:
                 {{- range $key, $value := .Values.patcher.routes.annotations }}
