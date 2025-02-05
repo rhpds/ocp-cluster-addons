@@ -5,7 +5,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: "userinfo-showroom-{{ $.Values.user.base }}{{$user_index}}"
+  name: "showroom-{{ $.Values.user.base }}{{$user_index}}-userdata-out"
   namespace: "showroom-{{ $.Values.user.base }}{{$user_index}}"
   labels:
     demo.redhat.com/userinfo: ""
@@ -18,7 +18,7 @@ data:
       {
         "user{{$user_index}}":
         {
-            "lab_ui_url": "https://showroom-{{$.Values.user.base}}{{$user_index}}-showroom-{{$.Values.user.base}}{{$user_index}}.{{$.Values.deployer.domain}}"
+          "lab_ui_url": "https://showroom-{{$.Values.user.base}}{{$user_index}}-showroom-{{$.Values.user.base}}{{$user_index}}.{{$.Values.deployer.domain}}"
         }
       }
     }
