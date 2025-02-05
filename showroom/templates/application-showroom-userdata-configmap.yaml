@@ -1,0 +1,26 @@
+# every showroom user gets its own user_data configmap to emit
+{{- $max_users := ( add ( int .Values.user.count ) 1 ) -}}
+{{- range $user_index := untilStep 1 ( int $max_users ) 1 }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "userinfo-showroom-{{ $.Values.user.base }}{{$user_index}}"
+  namespace: "showroom-{{ $.Values.user.base }}{{$user_index}}"
+  labels:
+    demo.redhat.com/userinfo: ""
+  annotations:
+    argocd.argoproj.io/sync-wave: "4" # TODO: need to make this syncwave in concert with other addons
+data:
+  users_json: >-
+    {
+      "users":
+      {
+        "user{{$user_index}}":
+        {
+            "lab_ui_url": "https://showroom-{{$.Values.user.base}}{{$user_index}}-showroom-{{$.Values.user.base}}{{$user_index}}.{{$.Values.deployer.domain}}"
+        }
+      }
+    }
+
+{{- end }}
