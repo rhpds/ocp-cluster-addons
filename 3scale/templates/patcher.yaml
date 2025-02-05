@@ -41,22 +41,31 @@ data:
       connection: local
       gather_facts: false
       tasks:
+      - name: get routes in {{ .Values.patcher.namespace }} namespace
+        kubernetes.core.k8s_info:
+          api_version: route.openshift.io/v1
+          kind: Route
+          namespace: "{{ .Values.patcher.namespace }}"
+          label_selectors:
+            {{- toYaml .Values.patcher.routes.label_selectors | nindent 10 }}
+        register: route_info
+        until: route_info.resources | length > 0
+        retries: 15
+        delay: 5
       - name: annotate routes in {{ .Values.patcher.namespace }} namespace
         kubernetes.core.k8s:
           state: patched
           api_version: route.openshift.io/v1
           kind: Route
           namespace: "{{ .Values.patcher.namespace }}"
-          label_selectors:
-          {{- toYaml .Values.patcher.routes.label_selectors | nindent 10 }}
+          name: "{{`{{ item }}`}}"
           definition:
             metadata:
               annotations:
                 {{- range $key, $value := .Values.patcher.routes.annotations }}
                 {{ $key }}: {{ quote $value }}
                 {{- end }}
-          wait: yes
-          wait_timeout: 300
+        loop: "{{`{{ route_info.resources | map(attribute='metadata.name') | list }}`}}"
 ---
 apiVersion: batch/v1
 kind: Job
