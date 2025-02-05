@@ -75,7 +75,7 @@ spec:
       - name: ansible
         image: {{ .Values.patcher.image }}
         command: ["ansible-playbook"]
-        args: ["/ansible/playbook.yaml"]
+        args: ["/ansible/playbook.yaml", "-vvv"]
         volumeMounts:
         - name: ansible
           mountPath: /ansible
