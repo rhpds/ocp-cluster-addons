@@ -43,7 +43,7 @@ data:
       tasks:
       - name: annotate routes in {{ .Values.patcher.namespace }} namespace
         kubernetes.core.k8s:
-          state: present
+          state: patched
           api_version: route.openshift.io/v1
           kind: Route
           namespace: "{{ .Values.patcher.namespace }}"

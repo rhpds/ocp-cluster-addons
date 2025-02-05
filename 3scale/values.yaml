@@ -50,7 +50,6 @@ patcher:
   # routes:
   #   label_selectors:
   #   - "zync.3scale.net/route-to=apicast-production"
-  #   - "zync.3scale.net/route-to=apicast-staging"
   #   annotations:
   #     haproxy.router.openshift.io/timeout: "180s"
 
