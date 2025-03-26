@@ -19,14 +19,3 @@ operator:
     # env:
     # - name: PLATFORM
     #   value: "HyperShift"
-# Using sub-chart helper-status-checker
-helper-status-checker:
-  enabled: true
-  approver: false
-  checks:
-    - operatorName: compliance-operator
-      namespace:
-        name: openshift-compliance
-      syncwave: '1'
-      serviceAccount:
-        name: "compliance-status-checker"

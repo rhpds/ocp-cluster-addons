@@ -22,15 +22,6 @@ spec:
               env:
               - name: PLATFORM
                 value: "HyperShift"
-        helper-status-checker:
-          approver: true
-          checks:
-            - operatorName: compliance-operator
-              namespace:
-                name: openshift-compliance
-              syncwave: '1'
-              serviceAccount:
-                name: "compliance-status-checker"
   destination:
     server: https://kubernetes.default.svc
     namespace: openshift-compliance
