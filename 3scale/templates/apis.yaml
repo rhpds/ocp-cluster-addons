@@ -42,6 +42,9 @@ spec:
   applicationPlans:
     standard:
       name: "Standard Plan"
+      {{- if .applicationPlans.standard.appsRequireApproval }}
+      appsRequireApproval: {{ .applicationPlans.standard.appsRequireApproval }}
+      {{- end }}
       published: true
 ---
 apiVersion: capabilities.3scale.net/v1beta1

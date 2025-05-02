@@ -85,5 +85,13 @@ apis:
         pattern: "/v1/embeddings"
         metricMethodRef: embeddings
         increment: 1
+    applicationPlans:
+      standard:
+        name: "Standard Plan"
+        appsRequireApproval: "false"
+        published: "true"
+user:
+  - name: user1
+    email: user1@example.com
   # - name: other
   #   activeDocOpenAPIRef: https://unknown/openapi.json
