@@ -43,6 +43,10 @@ apimanagerChecker:
 #   - name: other
 #     activeDocOpenAPIRef: https://unknown/openapi.json
 
+users:
+  - name: user1
+    password: openshift
+
 patcher:
   name: 3scale-patcher
   namespace: 3scale
