@@ -1,9 +1,9 @@
 
 apis:
-  - name: granite-8b-code-instruct
-    activeDocOpenAPIRef: https://raw.githubusercontent.com/redhat-gpte-devopsautomation/llm-aas/refs/heads/main/bootstrap/3scale/api_definitions/granite-8b-code-instruct.json
+  - name: granite-3dot2-8b-instruct
+    activeDocOpenAPIRef: https://github.com/redhat-gpte-devopsautomation/lb1816-summit-llm-aas/raw/refs/heads/main/bootstrap/3scale/api_definitions/granite-3dot2-8b-instruct.json
     backend:
-      privateBaseURL: http://granite-8b-code-instruct-128k-predictor.llm-hosting.svc.cluster.local:8080
+      privateBaseURL: http://granite-3dot2-8b-instruct-predictor.llm-hosting.svc.cluster.local:8080
       path: /
     deployment:
       apicastHosted:
@@ -85,5 +85,13 @@ apis:
         pattern: "/v1/embeddings"
         metricMethodRef: embeddings
         increment: 1
+    applicationPlans:
+      standard:
+        name: "Standard Plan"
+        appsRequireApproval: "false"
+        published: "true"
+user:
+  - name: user1
+    email: user1@example.com
   # - name: other
   #   activeDocOpenAPIRef: https://unknown/openapi.json
