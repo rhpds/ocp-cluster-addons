@@ -90,8 +90,5 @@ apis:
         name: "Standard Plan"
         appsRequireApproval: "false"
         published: "true"
-user:
-  - name: user1
-    email: user1@example.com
   # - name: other
   #   activeDocOpenAPIRef: https://unknown/openapi.json
