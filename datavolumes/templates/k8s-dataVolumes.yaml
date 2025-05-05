@@ -1,0 +1,31 @@
+{{- range .Values.datavolumes.volumes }}
+---
+apiVersion: cdi.kubevirt.io/v1beta1
+kind: DataVolume
+metadata:
+  name: {{ .volume_name }}
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    cdi.kubevirt.io/storage.bind.immediate.requested: 'true'
+spec:
+  source:
+    http:
+      url: {{ $.Values.datavolumes.imageUrl }}/{{ .object_name }}
+  storage:
+    resources:
+      requests:
+        storage: {{ .size }}
+---
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: {{ .volume_name }}-volumesnapshot
+  namespace: default
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  volumeSnapshotClassName: {{ $.Values.datavolumes.volumeSnapshotClassName }}
+  source:
+    persistentVolumeClaimName: {{ .volume_name }}
+{{- end }}
