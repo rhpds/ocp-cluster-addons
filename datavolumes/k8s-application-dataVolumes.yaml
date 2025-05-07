@@ -1,0 +1,33 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: datavolumes
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.datavolumes.git.url }}
+    targetRevision: {{ .Values.datavolumes.git.revision }}
+    path: {{ .Values.datavolumes.git.path }}
+    helm:
+      values: |
+        # Optional, defaults to IBMCOS.
+        # Indicate the AWS S3 URL to enable AWS S3 source.
+        # Known-Good URL is in ocp-cluster-addons/datavolumes/values.yaml
+        datavolumes:
+          imageUrl: {{ .Values.datavolumes.imageUrl }}
+          # Indicate custom images below, detailed in your own values.yaml
+          # or passed in from the provisioner.
+          volumes:
+          {{- range .Values.datavolumes.volumes }}
+          - object_name: {{ .object_name }}
+            volume_name: {{ .volume_name }}
+            size: {{ .size }}
+            volumeSnapshotClassName: {{ .volumeSnapshotClassName }}
+          {{- end }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated: {}
