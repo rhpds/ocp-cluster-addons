@@ -1,0 +1,144 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: showroom-addon
+  namespace: openshift-gitops
+spec:
+  goTemplate: true
+  # goTempalteOptions: ["missingkey=error"]
+  template:
+    metadata:
+      name: showroom-{{ $.Values.username }}
+      finalizers:
+      - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      source:
+        repoURL: {{ .Values.showroom.repoUrl }}
+        targetRevision: {{ .Values.showroom.repoRef }}
+        path: charts/showroom-single-pod
+        helm:
+          values: |
+            guid: nnnnn
+            deployer:
+              domain: cluster-GUID.GUID.sandboxNUMBERS.opentlc.com
+            proxy:
+              image: quay.io/rhpds/nginx:1.25
+              #  image: docker.io/library/nginx:1.25
+              imagePullPolicy: IfNotPresent
+            content:
+              title: Showroom
+              # Only create a content pane, no other tabs will be available
+              contentOnly: "false"
+              image: ghcr.io/rhpds/showroom-content:prod
+              imagePullPolicy: IfNotPresent
+              repoUrl: https://github.com/rhpds/showroom_template_default.git
+              repoRef: main
+              antoraPlaybook: default-site.yml
+              resources:
+                limits:
+                  memory: 64Mi
+                requests:
+                  cpu: 100m
+                  memory: 64Mi
+              user_data: |
+                bastion_password: from_helm
+
+            # to have two terminals in one tab
+            # set stacked_terminals to "true"
+            # and indicate which two terminals you want
+            stacked_terminals:
+              setup: "false"
+              name: stacked-terminal
+              display_name: "Stacked Terminal"
+              top: "terminal"
+              bottom: "wetty"
+
+            second_terminal_tab:
+              setup: "true"
+              name: second-terminal-tab
+              display_name: "Terminal 2"
+
+            terminal:
+              setup: "true"
+              image: quay.io/rhpds/openshift-showroom-terminal-ocp:latest
+              name: terminal
+              display_name: "Terminal 1"
+              port: 7681
+              resources:
+                limits:
+                  cpu: 500m
+                  memory: 1Gi
+                requests:
+                  cpu: 500m
+                  memory: 512Mi
+              # Set up persistent storage for the lab-user's home directory
+              storage:
+                setup: "true"
+                pvcSize: 5Gi
+                # Use default Storage Class when empty
+                storageClass: ""
+
+            wetty:
+              setup: "true"
+              image: quay.io/rhpds/wetty:latest
+              name: wetty
+              display_name: "Login Terminal 1"
+              port: 8001
+              base: "wetty"
+              resources:
+                limits:
+                  memory: 256Mi
+                requests:
+                  cpu: 500m
+                  memory: 256Mi
+              ssh:
+                autoSshToBastion: "false"
+                sshHost: shared-410-bastion.openshift.redhatworkshops.io
+                sshPort: 22
+                sshUser: ec2-user
+                sshAuth: password
+                sshPass: password
+
+            # To be fully implemented
+            codeserver:
+              setup: "false"
+              image: quay.io/rhpds/code-server:latest
+              resources:
+                limits:
+                  memory: 512Mi
+                requests:
+                  cpu: 500m
+                  memory: 512Mi
+
+            # To be fully implemented
+            ocpconsole:
+              setup: "false"
+
+            novnc:
+              setup: "false"
+              image: ghcr.io/rhpds/showroom-novnc:latest
+              port: 6080
+              vncServer: 127.0.0.1:5900
+              password: password
+              resources:
+                limits:
+                  memory: 256Mi
+                requests:
+                  cpu: 500m
+                  memory: 256Mi
+            deployer:
+              domain: {{ .Values.deployer.domain }}
+            content:
+              repoUrl: {{ .Values.content.repoUrl }}
+              repoRef: {{ .Values.content.repoRef }}
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: showroom-{{ $.Values.guid }}-{{ $.Values.username }}
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
