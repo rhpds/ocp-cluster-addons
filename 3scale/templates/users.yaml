@@ -15,7 +15,7 @@ stringData:
 apiVersion: capabilities.3scale.net/v1beta1
 kind: DeveloperAccount
 metadata:
-  name: {{ .name }}
+  name: {{ .name }}-account
   namespace: {{ $.Values.namespace }}
   annotations:
     argocd.argoproj.io/sync-wave: "3"
@@ -38,5 +38,5 @@ spec:
   passwordCredentialsRef:
     name: {{ .name }}-pwd
   developerAccountRef:
-    name: {{ .name }}
+    name: {{ .name }}-account
 {{- end }}
