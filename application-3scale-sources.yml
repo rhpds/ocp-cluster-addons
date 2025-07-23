@@ -12,7 +12,7 @@ spec:
       path: 3scale
       helm:
         valueFiles:
-          - $values/bootstrap/3scale/helm-apis-values.yaml
+          - $values/bootstrap/3scale/values-apis.yaml
         values: |
           namespace: 3scale
           operator:
