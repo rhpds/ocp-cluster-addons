@@ -21,10 +21,9 @@ spec:
           apimanager:
             wildcardDomain: apps.cluster-guid.guid.sandbox.opentlc.com
             tenantName: maas
-            removeBearer:
-              name: remove-bearer
+            llmMetrics:
+              name: llm-metrics
               version: 0.1
-              secret: cp-bearer
           helper-status-checker:
             approver: true
             checks:

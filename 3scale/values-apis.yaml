@@ -1,4 +1,4 @@
-
+# https://github.com/3scale/3scale-operator/blob/master/doc/product-reference.md
 apis:
   - name: granite-8b-code-instruct
     activeDocOpenAPIRef: https://raw.githubusercontent.com/redhat-gpte-devopsautomation/llm-aas/refs/heads/main/bootstrap/3scale/api_definitions/granite-8b-code-instruct.json
@@ -10,7 +10,7 @@ apis:
         authentication:
           userkey:
             authUserKey: Authorization
-            credentials: headers
+            credentials: authorization
     policies:
       - name: cors
         enabled: true
@@ -20,14 +20,6 @@ apis:
           allow_methods: []
           allow_origin: "*"
           allow_credentials: true
-      - name: remove-bearer
-        enabled: true
-        version: "0.1"
-        configuration: {}
-      - name: apicast
-        enabled: true
-        version: builtin
-        configuration: {}
       - name: upstream_connection
         enabled: true
         version: builtin
@@ -35,6 +27,14 @@ apis:
           connect_timeout: 180
           send_timeout: 180
           read_timeout: 180
+      - name: llm-metrics
+        enabled: true
+        version: "0.1"
+        configuration: {}
+      - name: apicast
+        enabled: true
+        version: builtin
+        configuration: {}
     methods:
       health:
         friendlyName: Health
@@ -105,14 +105,6 @@ apis:
           allow_methods: []
           allow_origin: "*"
           allow_credentials: true
-      - name: remove-bearer
-        enabled: true
-        version: "0.1"
-        configuration: {}
-      - name: apicast
-        enabled: true
-        version: builtin
-        configuration: {}
       - name: upstream_connection
         enabled: true
         version: builtin
@@ -120,6 +112,14 @@ apis:
           connect_timeout: 180
           send_timeout: 180
           read_timeout: 180
+      - name: llm-metrics
+        enabled: true
+        version: "0.1"
+        configuration: {}
+      - name: apicast
+        enabled: true
+        version: builtin
+        configuration: {}
     methods:
       health:
         friendlyName: Health
