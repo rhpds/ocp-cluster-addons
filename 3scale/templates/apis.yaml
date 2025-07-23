@@ -30,6 +30,7 @@ spec:
   {{- $sections := dict
     "deployment" .deployment
     "policies" .policies
+    "metrics" .metrics
     "methods" .methods
     "mappingRules" .mappingRules
   -}}
