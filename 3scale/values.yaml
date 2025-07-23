@@ -23,6 +23,9 @@ apimanager:
   #   name: remove-bearer
   #   version: 0.1
   #   secret: cp-bearer
+  # llmMetrics:
+  #   name: llm-metrics
+  #   version: 0.1
 
 apimanagerChecker:
   name: "apimanager-checker"
