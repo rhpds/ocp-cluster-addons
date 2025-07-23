@@ -19,9 +19,9 @@ apimanager:
   wildcardDomain: apps.cluster-guid.guid.sandbox.opentlc.com
   tenantName: default
   storageClassName: ocs-storagecluster-cephfs
-  llmMetrics:
-    name: llm-metrics
-    version: 0.1
+  # llmMetrics:
+  #   name: llm-metrics
+  #   version: 0.1
 
 apimanagerChecker:
   name: "apimanager-checker"
