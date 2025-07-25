@@ -45,7 +45,7 @@ patcher:
   name: rhoai-patcher
   namespace: redhat-ods-applications
   syncwave: "3"
-  image: quay.io/agnosticd/ee-multicloud:v0.1.2
+  image: registry.redhat.io/openshift4/ose-cli
   # dashboard:
   #   replicas: 1
 

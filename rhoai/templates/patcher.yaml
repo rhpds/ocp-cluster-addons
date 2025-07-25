@@ -27,34 +27,6 @@ subjects:
   name: {{ .Values.patcher.name }}
   namespace: {{ .Values.patcher.namespace }}
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Values.patcher.name }}
-  namespace: {{ .Values.patcher.namespace }}
-  annotations:
-    argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/hook-delete-policy: HookSucceeded
-    argocd.argoproj.io/sync-wave: "{{ .Values.patcher.syncwave }}"
-data:
-  playbook.yaml: |
-    ---
-    - name: rhoai patcher
-      hosts: localhost
-      connection: local
-      gather_facts: false
-      tasks:
-      - name: patch rhods-dashboard replicas to {{ .Values.patcher.dashboard.replicas }}
-        kubernetes.core.k8s:
-          state: patched
-          kind: Deployment
-          name: rhods-dashboard
-          namespace: "{{ .Values.patcher.namespace }}"
-          definition:
-            spec:
-              replicas: {{ .Values.patcher.dashboard.replicas | int }}
-
----
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -70,15 +42,11 @@ spec:
       serviceAccountName: {{ .Values.patcher.name }}
       restartPolicy: Never
       containers:
-      - name: ansible
+      - name: oc
         image: {{ .Values.patcher.image }}
-        command: ["ansible-playbook"]
-        args: ["/ansible/playbook.yaml"]
-        volumeMounts:
-        - name: ansible
-          mountPath: /ansible
-      volumes:
-      - name: ansible
-        configMap:
-          name: {{ .Values.patcher.name }}
-{{- end }}
+        command: ["/bin/bash", "-c"]
+        args:
+        - |
+          oc scale deployment rhods-dashboard --replicas={{ .Values.patcher.dashboard.replicas }} -n {{ .Values.patcher.namespace }}
+          oc rollout status deployment/rhods-dashboard -n {{ .Values.patcher.namespace }} --watch=true
+{{end}}
