@@ -15,13 +15,13 @@ stringData:
 apiVersion: capabilities.3scale.net/v1beta1
 kind: DeveloperAccount
 metadata:
-  name: {{ .name }}-account
+  name: {{ .name }}
   namespace: {{ $.Values.namespace }}
   annotations:
     argocd.argoproj.io/sync-wave: "3"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
-  orgName: "{{ .name }}-org"
+  orgName: "{{ .name }}"
 ---
 kind: DeveloperUser
 apiVersion: capabilities.3scale.net/v1beta1
@@ -38,5 +38,5 @@ spec:
   passwordCredentialsRef:
     name: {{ .name }}-pwd
   developerAccountRef:
-    name: {{ .name }}-account
+    name: {{ .name }}
 {{- end }}
