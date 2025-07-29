@@ -26,7 +26,6 @@ apimanager:
 apimanagerChecker:
   name: "apimanager-checker"
   syncwave: "3"
-  image: quay.io/agnosticd/ee-multicloud:v0.1.2
   retries: 60
   delay: 5
 
@@ -45,16 +44,20 @@ apimanagerChecker:
 users:
   - name: user1
     password: openshift
+    service: granite-3dot2-8b-instruct
 
 patcher:
   name: 3scale-patcher
   namespace: 3scale
-  image: quay.io/agnosticd/ee-multicloud:v0.1.2
   # routes:
   #   label_selectors:
   #   - "zync.3scale.net/route-to=apicast-production"
   #   annotations:
   #     haproxy.router.openshift.io/timeout: "180s"
+
+images:
+  multicloud: quay.io/agnosticd/ee-multicloud:v0.1.2
+  toolbox: registry.redhat.io/3scale-amp2/toolbox-rhel9:1.11.0
 
 # Using sub-chart helper-status-checker
 helper-status-checker:

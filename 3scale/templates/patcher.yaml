@@ -82,7 +82,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: ansible
-        image: {{ .Values.patcher.image }}
+        image: {{ .Values.images.multicloud }}
         command: ["ansible-playbook"]
         args: ["/ansible/playbook.yaml", "-vvv"]
         volumeMounts:
