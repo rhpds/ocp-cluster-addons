@@ -6,7 +6,7 @@ metadata:
   name: {{ .Values.patcher.name }}
   namespace: {{ .Values.patcher.namespace }}
   annotations:
-    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
     argocd.argoproj.io/sync-wave: "{{ .Values.patcher.syncwave }}"
 ---
@@ -15,7 +15,7 @@ kind: ClusterRoleBinding
 metadata:
   name: {{ .Values.patcher.name }}
   annotations:
-    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
     argocd.argoproj.io/sync-wave: "{{ .Values.patcher.syncwave }}"
 roleRef:
@@ -33,7 +33,7 @@ metadata:
   name: {{ .Values.patcher.name }}
   namespace: {{ .Values.patcher.namespace }}
   annotations:
-    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook: PostSync
     argocd.argoproj.io/sync-wave: "{{ .Values.patcher.syncwave }}"
 spec:
   backoffLimit: 3

@@ -44,7 +44,7 @@ datasciencecluster:
 patcher:
   name: rhoai-patcher
   namespace: redhat-ods-applications
-  syncwave: "3"
+  syncwave: "0"
   image: registry.redhat.io/openshift4/ose-cli
   # dashboard:
   #   replicas: 1
