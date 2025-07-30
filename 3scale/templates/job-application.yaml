@@ -7,9 +7,9 @@ metadata:
   namespace: {{ $.Values.namespace }}
   annotations:
     argocd.argoproj.io/hook: PostSync
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "10"
 spec:
-  backoffLimit: 2
+  backoffLimit: 4
   template:
     spec:
       restartPolicy: Never
@@ -19,6 +19,7 @@ spec:
         command: ["/bin/bash", "-c"]
         args:
         - |
+          set -e        
           CLEAN_ADMIN_URL=$(echo $ADMIN_URL | sed 's|^https://||')
           3scale remote add maas "https://$TOKEN@$CLEAN_ADMIN_URL"
           3scale service list maas
