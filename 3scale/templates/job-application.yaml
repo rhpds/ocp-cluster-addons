@@ -25,9 +25,10 @@ spec:
           3scale service list maas
 
           echo "Creating application for {{ .name }}..."
-          3scale application apply maas {{ .password }} \
+          3scale application apply maas {{ .name }} \
             --account="{{ .name }}" \
-            --name="{{ .name }} Application" \
+            --application-key="{{ .password }}" \
+            --name="{{ .name }} app" \
             --description="Application for {{ .name }}" \
             --plan="standard" \
             --service="{{ .service }}"
