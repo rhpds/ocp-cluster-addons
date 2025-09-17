@@ -1,0 +1,13 @@
+{{- if and .Values.dscinitialization .Values.dscinitialization.serviceMesh -}}
+---
+apiVersion: dscinitialization.opendatahub.io/v1
+kind: DSCInitialization
+metadata:
+  name: {{ .Values.dscinitialization.name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  serviceMesh:
+    {{- .Values.dscinitialization.serviceMesh | toYaml | nindent 4 }}
+{{- end }}

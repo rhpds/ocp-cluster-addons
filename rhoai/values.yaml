@@ -13,6 +13,13 @@ operator:
   sourceNamespace: openshift-marketplace
   # startingCSV: rhods-operator.x.y.x
 
+# Set to empty to NOT install DSCInitialization
+# dscinitialization: ''
+dscinitialization:
+  name: default-dsci
+  serviceMesh:
+    managementState: Removed
+
 # Set to empty to NOT install DataScienceCluster
 # datasciencecluster: ''
 datasciencecluster:
@@ -25,7 +32,12 @@ datasciencecluster:
     datasciencepipelines:
       managementState: Removed
     kserve:
-      managementState: Removed
+      managementState: Managed
+      defaultDeploymentMode: RawDeployment
+      rawDeploymentServiceConfig: Headed
+      serving:
+        managementState: Removed
+        name: knative-serving
     kueue:
       managementState: Removed
     modelmeshserving:
@@ -39,6 +51,10 @@ datasciencecluster:
     trainingoperator:
       managementState: Removed
     trustyai:
+      managementState: Removed
+    feastoperator:
+      managementState: Removed
+    llamastackoperator:
       managementState: Removed
 
 patcher:
@@ -60,3 +76,4 @@ helper-status-checker:
       syncwave: '1'
       serviceAccount:
         name: "rhoai-status-checker"
+
