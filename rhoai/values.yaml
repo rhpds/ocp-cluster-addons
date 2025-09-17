@@ -32,7 +32,12 @@ datasciencecluster:
     datasciencepipelines:
       managementState: Removed
     kserve:
-      managementState: Removed
+      managementState: Managed
+      defaultDeploymentMode: RawDeployment
+      rawDeploymentServiceConfig: Headed
+      serving:
+        managementState: Removed
+        name: knative-serving
     kueue:
       managementState: Removed
     modelmeshserving:
