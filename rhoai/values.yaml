@@ -18,7 +18,7 @@ operator:
 dscinitialization:
   name: default-dsci
   serviceMesh:
-    managementState: Removed
+    managementState: Unmanaged
 
 # Set to empty to NOT install DataScienceCluster
 # datasciencecluster: ''
