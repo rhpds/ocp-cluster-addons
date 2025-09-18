@@ -1,3 +1,4 @@
+{{- if .Values.users }}
 {{- range .Values.users }}
 ---
 apiVersion: batch/v1
@@ -45,6 +46,7 @@ spec:
               name: 3scale-maas-tenant-secret
               key: token
 ---
+{{- end }}
 {{- end }}
 
 # apiVersion: capabilities.3scale.net/v1beta1
