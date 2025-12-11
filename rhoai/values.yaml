@@ -14,17 +14,17 @@ operator:
   # startingCSV: rhods-operator.x.y.x
 
 # Set to empty to NOT install DSCInitialization
-# dscinitialization: ''
-dscinitialization:
-  name: default-dsci
-  serviceMesh:
-    managementState: Removed
+dscinitialization: ''
+# dscinitialization:
+#   name: default-dsci
+#   serviceMesh:
+#     managementState: Removed
 
 # Set to empty to NOT install DataScienceCluster
 # datasciencecluster: ''
 datasciencecluster:
   name: default-dsc
-  apiVersion: datasciencecluster.opendatahub.io/v2
+  apiVersion: datasciencecluster.opendatahub.io/v1
   components:
     aipipelines:
       argoWorkflowsControllers:
@@ -35,15 +35,8 @@ datasciencecluster:
     feastoperator:
       managementState: Removed
     kserve:
-      managementState: Managed
-      defaultDeploymentMode: RawDeployment
-      rawDeploymentServiceConfig: Headed
-      serving:
-        managementState: Removed
-        name: knative-serving
+      managementState: Removed
     kueue:
-      defaultClusterQueueName: default
-      defaultLocalQueueName: default
       managementState: Removed
     llamastackoperator:
       managementState: Removed
