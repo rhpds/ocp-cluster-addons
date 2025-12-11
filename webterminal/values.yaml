@@ -12,6 +12,7 @@ operator:
   source: redhat-operators
   sourceNamespace: openshift-marketplace
   # startingCSV: web-terminal.x.y.z
+  syncwave: -5
 
 # Using sub-chart helper-status-checker
 helper-status-checker:
