@@ -1,6 +1,6 @@
 {{ if .Values.datasciencecluster -}}
 ---
-apiVersion: {{ .Values.operator.apiVersion }}
+apiVersion: {{ .Values.datasciencecluster.apiVersion }}
 kind: DataScienceCluster
 metadata:
   name: {{ .Values.datasciencecluster.name }}
