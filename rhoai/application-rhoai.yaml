@@ -16,24 +16,6 @@ spec:
           namespace: redhat-ods-operator
           startingCSV: rhods-operator.x.y.z
           installPlanApproval: Manual
-        datasciencecluster:
-          components:
-            codeflare:
-              managementState: Managed
-            dashboard:
-              managementState: Managed
-            datasciencepipelines:
-              managementState: Managed
-            kserve:
-              managementState: Managed  
-            kueue:
-              managementState: Managed
-            modelmeshserving:
-              managementState: Managed
-            ray:
-              managementState: Managed
-            workbenches:
-              managementState: Managed
         patcher:
           namespace: redhat-ods-applications
           dashboard:
