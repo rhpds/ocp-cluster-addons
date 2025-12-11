@@ -1,6 +1,6 @@
 {{ if .Values.datasciencecluster -}}
 ---
-apiVersion: datasciencecluster.opendatahub.io/v1
+apiVersion: {{ .Values.operator.apiVersion }}
 kind: DataScienceCluster
 metadata:
   name: {{ .Values.datasciencecluster.name }}

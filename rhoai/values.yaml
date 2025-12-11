@@ -11,6 +11,7 @@ operator:
   installPlanApproval: Automatic
   source: redhat-operators
   sourceNamespace: openshift-marketplace
+  apiVersion: datasciencecluster.opendatahub.io/v2
   # startingCSV: rhods-operator.x.y.x
 
 # Set to empty to NOT install DSCInitialization
@@ -25,11 +26,13 @@ dscinitialization:
 datasciencecluster:
   name: default-dsc
   components:
-    codeflare:
+    aipipelines:
+      argoWorkflowsControllers:
+        managementState: Removed 
       managementState: Removed
     dashboard:
       managementState: Removed
-    datasciencepipelines:
+    feastoperator:
       managementState: Removed
     kserve:
       managementState: Managed
@@ -39,22 +42,20 @@ datasciencecluster:
         managementState: Removed
         name: knative-serving
     kueue:
+      defaultClusterQueueName: default
+      defaultLocalQueueName: default
       managementState: Removed
-    modelmeshserving:
+    llamastackoperator:
       managementState: Removed
     modelregistry:
       managementState: Removed
     ray:
       managementState: Removed
-    workbenches:
-      managementState: Removed
     trainingoperator:
       managementState: Removed
     trustyai:
       managementState: Removed
-    feastoperator:
-      managementState: Removed
-    llamastackoperator:
+    workbenches:
       managementState: Removed
 
 patcher:
@@ -76,4 +77,3 @@ helper-status-checker:
       syncwave: '1'
       serviceAccount:
         name: "rhoai-status-checker"
-

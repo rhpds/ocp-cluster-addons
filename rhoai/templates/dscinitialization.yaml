@@ -1,6 +1,6 @@
 {{- if and .Values.dscinitialization .Values.dscinitialization.serviceMesh -}}
 ---
-apiVersion: dscinitialization.opendatahub.io/v1
+apiVersion: {{ .Values.operator.apiVersion }}
 kind: DSCInitialization
 metadata:
   name: {{ .Values.dscinitialization.name }}
