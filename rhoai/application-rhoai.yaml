@@ -13,21 +13,13 @@ spec:
     helm:
       values: |
         operator:
-          namespace: redhat-ods-operator
           startingCSV: rhods-operator.x.y.z
           installPlanApproval: Manual
         patcher:
-          namespace: redhat-ods-applications
           dashboard:
             replicas: 1
         helper-status-checker:
-          checks:
-            - operatorName: rhods-operator
-              namespace:
-                name: redhat-ods-operator
-              syncwave: '1'
-              serviceAccount:
-                name: "rhoai-status-checker"
+          approver: false
   destination:
     server: https://kubernetes.default.svc
-    namespace: redhat-ods-operator
+
