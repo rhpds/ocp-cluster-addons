@@ -52,7 +52,7 @@ data:
 
     # Auto-discover the gateway
     echo "🔍 Discovering Gateway..."
-    GATEWAY_INFO=$(kubectl get gateway --all-namespaces -o json | jq -r '.items[] | select(.metadata.name | contains("gateway")) | "\(.metadata.namespace)/\(.metadata.name)"' | head -1)
+    GATEWAY_INFO=$(kubectl get gateway --all-namespaces --no-headers -o custom-columns=NS:.metadata.namespace,NAME:.metadata.name | awk '$2 ~ /gateway/ {print $1"/"$2; exit}')
 
     if [ -z "$GATEWAY_INFO" ]; then
         echo "❌ Error: No Gateway found in cluster"
@@ -187,7 +187,7 @@ data:
         echo "   oc get gateway,svc,route -n $GATEWAY_NAMESPACE"
         echo ""
         echo "🔍 View Gateway HTTPRoutes:"
-        echo "   oc get httproute -A -o json | jq -r '.items[] | select(.spec.parentRefs[]?.name==\"$GATEWAY_NAME\") | \"\(.metadata.namespace)/\(.metadata.name)\"'"
+        echo "   oc get httproute -A -o jsonpath='{range .items[?(@.spec.parentRefs[*].name=="'$GATEWAY_NAME'")]}{.metadata.namespace}/{.metadata.name}{"\n"}{end}'"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     else
         echo "❌ Error: Failed to create Route"
