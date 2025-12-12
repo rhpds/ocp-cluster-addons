@@ -13,13 +13,13 @@ spec:
     helm:
       values: |
         operator:
-          startingCSV: rhods-operator.x.y.z
+          channel: fast-3.x
           installPlanApproval: Manual
         patcher:
           dashboard:
             replicas: 1
         helper-status-checker:
-          approver: false
+          approver: true
   destination:
     server: https://kubernetes.default.svc
 
