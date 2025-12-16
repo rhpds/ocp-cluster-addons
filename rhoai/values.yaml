@@ -56,7 +56,7 @@ patcher:
   namespace: redhat-ods-applications
   syncwave: "0"
   image: registry.redhat.io/openshift4/ose-cli
-  route: true
+  # route: true
   # dashboard:
   #   replicas: 1
 

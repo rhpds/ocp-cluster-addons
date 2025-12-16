@@ -15,11 +15,13 @@ spec:
         operator:
           channel: fast-3.x
           installPlanApproval: Manual
+        datasciencecluster:
+          apiVersion: datasciencecluster.opendatahub.io/v2
         patcher:
           dashboard:
             replicas: 1
+          route: true
         helper-status-checker:
           approver: true
   destination:
     server: https://kubernetes.default.svc
-
