@@ -8,7 +8,70 @@ When used with an ArgoCD Application, this Helm chart provides the following fun
 
 1. **Installs Showroom Chart from https://github.com/rhpds/showroom-deployer/**.
 
-=== Usage
+=== Use cases
+
+. Dedicated single-tenant cluster
+. Shared cluster with pre-provisioned users
+. Shared cluster with on-demand tenants
+
+Details of each use case:
+
+. Dedicated single-tenant cluster
+** Deploys a single Showroom pod in a single showroom namespace.
+** Showroom config (see below)
+** User data for showroom:
++
+[,yaml]
+----
+user_data:
+  # no `userN:` structure
+
+  # whatever you send from AgV that needs to be in Showroom
+  # use `agnosticd_passthrough_user_data` in AgV to pass through from child components to parent, if needed.
+  # Look for copious examples in AgV
+----
++
+. Shared cluser with pre-provisioned users
+** Deploys Showroom pods for each `userN`
+** Showroom config (see below)
+** User data for showroom:
++
+.User data
+[,yaml]
+----
+user_data:
+  # `userN:` structure is present
+
+  # whatever you send from AgV that needs to be in Showroom
+  # use `agnosticd_passthrough_user_data` in AgV to pass through from child components to parent, if needed.
+  # Look for copious examples in AgV
+----
++
+. Shared cluster with on-demand tenants (aka "seat" or "TenantSandbox")
+** Tenants have 1 or more users
+** Deploys a single Showroom pod for each tenant user `showroom-{{ guid (aka tenant id)}}-{{ string or integer (aka user id) }}`
+** Showroom config (see below)
+** User data for showroom:
++
+.Showroom config
+[,yaml]
+----
+showroom_config:
+  tenant_id: "{{ guid }}"
+
+  ... see below for other defaults ...
+----
++
+.User data
+[,yaml]
+----
+user_data:
+  # `userN:` structure is present
+----
+
+Argo implementation:  `tenant_id` becomes name of Argo application.
+
+== Usage
 
 To use this Helm chart with ArgoCD, you can refer to the [application-showroom.yaml](application-showroom.yaml) file provided in this repository.
 
@@ -16,78 +79,47 @@ To use this Helm chart with ArgoCD, you can refer to the [application-showroom.y
 
 - **ArgoCD**: Make sure you have ArgoCD installed and configured in your OpenShift cluster.
 
-=== Reference Values from AgD
-
-We are not copying this, just using it as a reminder
+=== Reference Values for `showroom_config:` from showroom collection
 
 [,yaml]
 ----
-- name: Render helm chart with values
-  environment:
-    KUBECONFIG: "{{ _showroom_kubeconfig | default(omit) }}"
-  kubernetes.core.helm_template:
-    chart_repo_url: "{{ ocp4_workload_showroom_chart_package_url }}"
-    chart_ref: "{{ ocp4_workload_showroom_deployer_chart_name }}"
-    chart_version: "{{ ocp4_workload_showroom_deployer_chart_version }}"
-    release_name: "{{ ocp4_workload_showroom_name }}"
-    release_namespace: "{{ _showroom_namespace }}"
-    release_values:
-      content:
-        user_data: "{{ _showroom_vars | to_nice_yaml(width=1337, default_style='\"') }}"
-        repoUrl: "{{ ocp4_workload_showroom_content_git_repo }}"
-        repoRef: "{{ ocp4_workload_showroom_content_git_repo_ref }}"
-        antoraPlaybook: "{{ ocp4_workload_showroom_content_antora_playbook }}"
-        contentOnly: "{{ ocp4_workload_showroom_content_only | bool | string | lower }}"
-      guid: "{{ guid }}"
-      deployer:
-        domain: "{{ _deployer_domain }}"
-      stacked_terminals:
-        setup: "{{ ocp4_workload_showroom_stacked_terminals_enable | bool | string | lower }}"
-        display_name: "{{ ocp4_workload_showroom_stacked_terminals_display_name }}"
-        top: "{{ 'terminal' if ocp4_workload_showroom_terminal_type == 'showroom' else ocp4_workload_showroom_terminal_type }}"
-        bottom: "{{ 'terminal' if ocp4_workload_showroom_terminal_type == 'showroom' else ocp4_workload_showroom_terminal_type }}"
-      second_terminal_tab:
-        setup: "{{ (true if ( ocp4_workload_showroom_second_terminal_tab_enable
-                         and not ocp4_workload_showroom_stacked_terminals_enable )
-                         else false) | bool | string | lower }}"
-        display_name: "{{ ocp4_workload_showroom_second_terminal_tab_display_name }}"
-      terminal:
-        setup: "{{ (true if ocp4_workload_showroom_terminal_type == 'showroom' else false) | bool | string | lower }}"
-        image: "{{ ocp4_workload_showroom_terminal_image }}"
-        resources:
-          requests:
-            cpu: "{{ ocp4_workload_showroom_terminal_requests_cpu }}"
-            memory: "{{ ocp4_workload_showroom_terminal_requests_memory }}"
-          limits:
-            cpu: "{{ ocp4_workload_showroom_terminal_limits_cpu }}"
-            memory: "{{ ocp4_workload_showroom_terminal_limits_memory }}"
-      wetty:
-        setup: "{{ (true if ocp4_workload_showroom_terminal_type == 'wetty' else false) | bool | string | lower }}"
-        image: "{{ ocp4_workload_showroom_wetty_image }}"
-        resources:
-          requests:
-            cpu: "{{ ocp4_workload_showroom_terminal_requests_cpu }}"
-            memory: "{{ ocp4_workload_showroom_terminal_requests_memory }}"
-          limits:
-            cpu: "{{ ocp4_workload_showroom_terminal_limits_cpu }}"
-            memory: "{{ ocp4_workload_showroom_terminal_limits_memory }}"
-        ssh:
-          autoSshToBastion: "{{ (true if ocp4_workload_showroom_wetty_ssh_bastion_login | bool else false) | bool | string | lower }}"
-          sshAuth: password
-          sshHost: "{{ _showroom_user_data.bastion_public_hostname }}"
-          sshUser: "{{ _showroom_user_data['users'][_showroom_user].bastion_ssh_user_name | default(_showroom_user_data.bastion_ssh_user_name) }}"
-          sshPass: "{{ _showroom_user_data['users'][_showroom_user].bastion_ssh_password | default(_showroom_user_data.bastion_ssh_password) }}"
-          sshPort: "{{ _showroom_user_data.bastion_ssh_port | default(22) }}"
-      novnc:
-        setup: "{{ (true if ocp4_workload_showroom_novnc_enable | bool else false) | bool | string | lower }}"
-        image: "{{ ocp4_workload_showroom_novnc_image }}"
-        vncServer: "{{ ocp4_workload_showroom_novnc_vnc_server_hostport }}"
-        password: "{{ ocp4_workload_showroom_novnc_vnc_server_password }}"
-        resources:
-          requests:
-            cpu: "{{ ocp4_workload_showroom_novnc_requests_cpu }}"
-            memory: "{{ ocp4_workload_showroom_novnc_requests_memory }}"
-          limits:
-            cpu: "{{ ocp4_workload_showroom_novnc_limits_cpu }}"
-            memory: "{{ ocp4_workload_showroom_novnc_limits_memory }}"
+showroom_config:
+  name: "showroom"
+  namespace: "showroom-{{ guid | default('00000') }}"
+
+  content_git_repo: https://github.com/rhpds/showroom_template_default.git
+  content_git_repo_ref: main
+  content_antora_playbook: default-site.yml
+  content_image: quay.io/rhpds/showroom-content:v1.3.0
+
+  terminal_type: showroom
+  terminal_image: quay.io/rhpds/openshift-showroom-terminal-ocp:latest
+  terminal_limits_cpu: 500m
+  terminal_limits_memory: 1Gi
+  terminal_requests_cpu: 50m
+  terminal_requests_memory: 256Mi
+
+  wetty_image: quay.io/rhpds/wetty:v2.5
+  wetty_ssh_bastion_login: false
+
+  chart_package_url: https://rhpds.github.io/showroom-deployer
+  deployer_chart_name: showroom-single-pod
+  deployer_chart_version: "^2.0.0"
+
+  novnc_enable: false
+  novnc_image: ghcr.io/rhpds/showroom-novnc:latest
+  novnc_limits_cpu: 550m
+  novnc_limits_memory: 256Mi
+  novnc_requests_cpu: 50m
+  novnc_requests_memory: 256Mi
+  novnc_vnc_server_hostport: 128.0.0.1:5900
+  novnc_vnc_server_password: password
+
+  passthrough_user_data: false
+  zero_touch_bundle: "https://github.com/rhpds/nookbag/releases/download/nookbag-v0.2.2/nookbag-v0.2.2.zip"
+  zero_touch_ui_enabled: true
+
+  # The service name to look for when waiting for the created route
+  # Usually `showroom-proxy` for multi-pod deployment and `showroom` for single pod deployment
+  service_name: "showroom"
 ----
