@@ -33,6 +33,7 @@ user_data:
 +
 . Shared cluser with pre-provisioned users
 ** Deploys Showroom pods for each `userN`
+** Users cannot access their own, nor others' showroom namespace and resources.
 ** Showroom config (see below)
 ** User data for showroom:
 +
@@ -49,6 +50,7 @@ user_data:
 +
 . Shared cluster with on-demand tenants (aka "seat" or "TenantSandbox")
 ** Tenants have 1 or more users
+** Tenants and their users cannot access their own, nor others' showroom namespace and resources.
 ** Deploys a single Showroom pod for each tenant user `showroom-{{ guid (aka tenant id)}}-{{ string or integer (aka user id) }}`
 ** Showroom config (see below)
 ** User data for showroom:
