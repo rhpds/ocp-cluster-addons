@@ -1,0 +1,23 @@
+# every showroom user gets its own user_data configmap to emit
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "showroom-{{ $.Values.guid }}-{{ $.Values.username }}-userdata-out"
+  namespace: "showroom-{{ $.Values.guid }}-{{ $.Values.username }}"
+  labels:
+    demo.redhat.com/userinfo: ""
+    app.kubernetes.io/part-of: showroom
+  annotations:
+    argocd.argoproj.io/sync-wave: "4" # TODO: need to make this syncwave in concert with other addons
+data:
+  users_json: >-
+    {
+      "users":
+      {
+        "{{$.Values.username}}":
+        {
+          "lab_ui_url": "https://showroom-{{ $.Values.username }}-showroom-{{ $.Values.guid }}{{$.Values.username }}.{{$.Values.deployer.domain}}"
+        }
+      }
+    }

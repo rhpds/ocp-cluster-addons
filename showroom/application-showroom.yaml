@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: showroom-apps
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/rhpds/ocp-cluster-addons.git'
+    targetRevision: showroom
+    path: showroom
+    helm:
+      values: |
+        user:
+          count: "{{ .Values.user.count }}"
+        deployer:
+          domain: {{ .Values.deployer.domain }}
+        content:
+          repoUrl: {{ .Values.content.repoUrl }}
+          repoRef:  {{ .Values.content.repoRef }}
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: openshift-gitops
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
