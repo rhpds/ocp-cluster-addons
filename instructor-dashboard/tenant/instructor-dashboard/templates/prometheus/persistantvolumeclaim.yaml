@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prometheus-data-pvc
+  labels:
+    app.kubernetes.io/name: prometheus-data-pvc
+    app.kubernetes.io/component: prometheus
+    app.kubernetes.io/part-of: instructor-dashboard
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

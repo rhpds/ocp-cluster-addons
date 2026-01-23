@@ -1,0 +1,18 @@
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: prometheus
+  labels:
+    app.kubernetes.io/name: prometheus-route
+    app.kubernetes.io/component: prometheus
+    app.kubernetes.io/part-of: instructor-dashboard
+spec:
+  host: 
+  to:
+    kind: Service
+    name: prometheus
+  port:
+    targetPort: 9090
+  tls:
+    termination: edge

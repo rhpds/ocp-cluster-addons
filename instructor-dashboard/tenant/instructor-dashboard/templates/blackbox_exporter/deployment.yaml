@@ -1,0 +1,38 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blackbox-exporter
+  labels:
+    app.kubernetes.io/name: blackbox-exporter-deployment
+    app.kubernetes.io/component: blackbox-exporter
+    app.kubernetes.io/part-of: instructor-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: blackbox-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: blackbox-exporter
+        app.kubernetes.io/component: blackbox-exporter
+        app.kubernetes.io/part-of: instructor-dashboard
+    spec:
+      containers:
+      - name: blackbox-exporter
+        image: prom/blackbox-exporter:latest
+        securityContext:
+          privileged: true
+        ports:
+        - containerPort: 9115
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/blackbox_exporter/config.yml
+          subPath: config.yml
+      volumes:
+      - name: config-volume
+        configMap:
+          name: blackbox-exporter-config
+      serviceAccount: blackbox-exporter
+      serviceAccountName: blackbox-exporter

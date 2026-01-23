@@ -1,0 +1,18 @@
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: pushgateway
+  labels:
+    app.kubernetes.io/name: pushgateway-route
+    app.kubernetes.io/component: pushgateway
+    app.kubernetes.io/part-of: instructor-dashboard
+spec:
+  host: 
+  to:
+    kind: Service
+    name: pushgateway
+  port:
+    targetPort: 9091
+  tls:
+    termination: edge

@@ -1,0 +1,17 @@
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: blackbox-exporter
+  labels:
+    app.kubernetes.io/name: blackbox-exporter-route
+    app.kubernetes.io/component: blackbox-exporter
+    app.kubernetes.io/part-of: instructor-dashboard
+spec:
+  to:
+    kind: Service
+    name: blackbox-exporter
+  port:
+    targetPort: 9115
+  tls:
+    termination: edge

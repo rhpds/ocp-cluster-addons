@@ -1,0 +1,31 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pushgwateway-deployment
+  labels:
+    app.kubernetes.io/name: pushgateway-deployment
+    app.kubernetes.io/component: pushgateway
+    app.kubernetes.io/part-of: instructor-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pushgateway
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pushgateway
+        app.kubernetes.io/component: pushgateway
+        app.kubernetes.io/part-of: instructor-dashboard
+    spec:
+      containers:
+      - name: pushgwateway
+        image: quay.io/prometheus/pushgateway
+        resources:
+          limits:
+            memory: 256Mi
+            cpu: 500m
+        ports:
+          - name: port-9091
+            containerPort: 9091

@@ -1,0 +1,115 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  labels:
+    app.kubernetes.io/name: prometheus-config
+    app.kubernetes.io/component: prometheus
+    app.kubernetes.io/part-of: instructor-dashboard
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 5s
+    scrape_configs:
+      - job_name: 'prometheus'
+        scrape_interval: 10s
+        static_configs:
+          - targets: ['prometheus:9090']
+      - job_name: 'pushgateway'
+        honor_labels: true
+        static_configs:
+          - targets: ['pushgateway:9091']
+      - job_name: 'blackbox_exporter'
+        static_configs:
+          - targets: ['blackbox-exporter:9115']
+      - job_name: 'rhem-virtual-machines'
+        scrape_interval: 5s
+        metrics_path: /probe
+        params:
+          module: [ssh_banner]
+        static_configs:
+          - targets:
+            {{- $userCount := int .Values.user.count }}
+            {{- range $index := until $userCount }}
+              - rhem-on-rhel-ssh.wksp-{{ $.Values.guid }}-{{ $.Values.user.prefix }}{{ add $index 1 }}.svc.cluster.local:22
+            {{- end }}
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter:9115
+      - job_name: 'rhem-on-rhel'
+        metrics_path: /probe
+        scrape_interval: 5s
+        params:
+          module: [http_insecure]
+        static_configs:
+          - targets:
+            {{- $userCount := int .Values.user.count }}
+            {{- range $index := until $userCount }}
+              - https://rhem-on-rhel.wksp-{{ $.Values.guid }}-{{ $.Values.user.prefix }}{{ add $index 1 }}.svc.cluster.local:443
+            {{- end }}
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter:9115
+      - job_name: 'qcow2-available'
+        metrics_path: /probe
+        scrape_interval: 5s
+        params:
+          module: [http_file_check]
+        static_configs:
+          - targets:
+            {{- $userCount := int .Values.user.count }}
+            {{- range $index := until $userCount }}
+              - import-disk-image.wksp-{{ $.Values.guid }}-{{ $.Values.user.prefix }}{{ add $index 1 }}.svc.cluster.local:8888/disk.qcow2
+            {{- end }}
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter:9115
+      - job_name: 'drone-tracker'
+        metrics_path: /probe
+        scrape_interval: 5s
+        params:
+          module: [http_2xx]
+        static_configs:
+          - targets:
+            {{- $userCount := int .Values.user.count }}
+            {{- range $index := until $userCount }}
+              - drone-tracker.wksp-{{ $.Values.guid }}-{{ $.Values.user.prefix }}{{ add $index 1 }}.svc.cluster.local:8080
+            {{- end }}
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter:9115
+      - job_name: 'drone-cam'
+        metrics_path: /probe
+        scrape_interval: 5s
+        params:
+          module: [http_2xx]
+        static_configs:
+          - targets:
+            {{- $userCount := int .Values.user.count }}
+            {{- range $index := until $userCount }}
+              - drone-cam.wksp-{{ $.Values.guid }}-{{ $.Values.user.prefix }}{{ add $index 1 }}.svc.cluster.local:8081
+            {{- end }}
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: __param_target
+          - source_labels: [__param_target]
+            target_label: instance
+          - target_label: __address__
+            replacement: blackbox-exporter:9115

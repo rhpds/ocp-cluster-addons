@@ -1,0 +1,34 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.guid }}-instructor-dashboard
+  namespace: openshift-gitops
+  labels:
+    application: {{ .Values.guid }}-instructor-dashboard
+    guid.rhdp.io: {{ .Values.guid }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    name: ''
+    server: https://kubernetes.default.svc
+    namespace: wksp-{{ .Values.guid }}
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+  source:
+    repoURL: https://github.com/rhpds/edge-fleet-gitops.git
+    targetRevision: rh1-2026
+    path: tenant/instructor-dashboard/
+    helm:
+      values: |
+        gitBranch: rh1-2026
+        user:
+          {{- with .Values.user }}
+          prefix: "{{ .prefix }}"
+          count: "{{ .count }}"
+          {{- end }}
+        guid: "{{ .Values.guid }}"
+        bastionSshPassword: "{{ .Values.bastion_ssh_password }}"
