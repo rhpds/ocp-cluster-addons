@@ -1,0 +1,5 @@
+= instructor-dashboard
+
+WARNING: Work in progress.
+
+Deploy a Grafana dashboard into a shared cluster to track lab readiness and participant progress.
