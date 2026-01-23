@@ -15,7 +15,7 @@ spec:
     automated:
       prune: true
   source:
-    repoURL: https://github.com/rhpds/edge-fleet-gitops.git
+    repoURL: https://github.com/rhpds/ocp-cluster-addons.git
     targetRevision: {{ .Values.gitBranch | default "main" }}
     path: infra/instructor-dashboard-rbac/
     helm:
