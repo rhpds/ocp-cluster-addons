@@ -1,0 +1,28 @@
+# Credentials and sensitive files
+credentials.txt
+*.key
+*.pem
+*.crt
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Helm
+*.tgz
+charts/*/charts/
+
+# Temporary files
+tmp/
+temp/

@@ -1,0 +1,31 @@
+---
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: Keycloak
+metadata:
+  name: keycloak
+  namespace: {{ .Values.namespace }}
+spec:
+  additionalOptions:
+    {{- toYaml .Values.keycloak.additionalOptions | nindent 4 }}
+  db:
+    database: {{ .Values.keycloak.database.database }}
+    host: {{ .Values.keycloak.database.host }}
+    passwordSecret:
+      key: password
+      name: {{ .Values.keycloak.database.secretName }}
+    usernameSecret:
+      key: user
+      name: {{ .Values.keycloak.database.secretName }}
+    vendor: {{ .Values.keycloak.database.vendor }}
+  hostname:
+    hostname: {{ .Values.keycloak.hostname }}.{{ .Values.keycloak.ingressDomain }}
+    strict: false
+    strictBackchannel: false
+  http:
+    httpEnabled: {{ .Values.keycloak.http.httpEnabled }}
+    tlsSecret: {{ .Values.keycloak.http.tlsSecret }}
+  ingress:
+    enabled: false
+  instances: {{ .Values.keycloak.instances }}
+  transaction:
+    xaEnabled: {{ .Values.keycloak.transaction.xaEnabled }}

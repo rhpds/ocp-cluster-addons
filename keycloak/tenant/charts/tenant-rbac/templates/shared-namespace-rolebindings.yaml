@@ -1,0 +1,54 @@
+{{- if .Values.rbac.sharedNamespaceAccess.enabled }}
+{{- range $ns := .Values.rbac.sharedNamespaceAccess.namespaces }}
+{{- if eq $.Values.users.mode "generate" }}
+{{- range $i := until ($.Values.users.generate.count | int) }}
+{{- $userNum := add ($.Values.users.generate.startNumber | int) $i }}
+{{- $username := printf "%s%d-%s" $.Values.users.generate.prefix $userNum $.Values.tenant.guid }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $username }}-{{ $.Values.rbac.sharedNamespaceAccess.clusterRole }}
+  namespace: {{ $ns }}
+  labels:
+    app.kubernetes.io/managed-by: argocd
+    app.kubernetes.io/component: tenant
+    app.kubernetes.io/instance: {{ $.Values.tenant.guid }}
+    tenant-guid: {{ $.Values.tenant.guid | quote }}
+    tenant-user: {{ $username | quote }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ $.Values.rbac.sharedNamespaceAccess.clusterRole }}
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: {{ $username }}
+{{- end }}
+{{- else if eq $.Values.users.mode "explicit" }}
+{{- range $username := $.Values.users.explicit.usernames }}
+{{- $fullUsername := printf "%s-%s" $username $.Values.tenant.guid }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $fullUsername }}-{{ $.Values.rbac.sharedNamespaceAccess.clusterRole }}
+  namespace: {{ $ns }}
+  labels:
+    app.kubernetes.io/managed-by: argocd
+    app.kubernetes.io/component: tenant
+    app.kubernetes.io/instance: {{ $.Values.tenant.guid }}
+    tenant-guid: {{ $.Values.tenant.guid | quote }}
+    tenant-user: {{ $fullUsername | quote }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ $.Values.rbac.sharedNamespaceAccess.clusterRole }}
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: {{ $fullUsername }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

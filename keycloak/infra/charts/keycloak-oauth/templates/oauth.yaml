@@ -1,0 +1,25 @@
+---
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  name: cluster
+spec:
+  identityProviders:
+  - name: {{ .Values.oauth.identityProvider.name }}
+    type: {{ .Values.oauth.identityProvider.type }}
+    mappingMethod: {{ .Values.oauth.identityProvider.mappingMethod }}
+    openID:
+      claims:
+        email:
+          {{- toYaml .Values.oauth.claims.email | nindent 10 }}
+        name:
+          {{- toYaml .Values.oauth.claims.name | nindent 10 }}
+        preferredUsername:
+          {{- toYaml .Values.oauth.claims.preferredUsername | nindent 10 }}
+      clientID: {{ .Values.oauth.client.id }}
+      clientSecret:
+        name: {{ .Values.oauth.client.secretName }}
+      extraScopes:
+        {{- toYaml .Values.oauth.extraScopes | nindent 8 }}
+      issuer: >-
+        https://{{ .Values.oauth.keycloak.hostname }}.{{ .Values.oauth.ingressDomain }}/realms/{{ .Values.oauth.keycloak.realmName }}

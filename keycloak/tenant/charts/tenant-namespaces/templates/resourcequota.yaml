@@ -1,0 +1,58 @@
+{{- if .Values.resourceQuota.enabled }}
+{{- if eq .Values.namespaces.mode "generate" }}
+{{- range $i := until (.Values.namespaces.generate.count | int) }}
+{{- $num := add ($.Values.namespaces.generate.startNumber | int) $i }}
+{{- $nsName := printf "%s%d-%s%s" $.Values.namespaces.generate.prefix $num $.Values.tenant.guid $.Values.namespaces.generate.suffix }}
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: tenant-quota
+  namespace: {{ $nsName }}
+  labels:
+    app.kubernetes.io/managed-by: argocd
+    app.kubernetes.io/component: tenant
+    app.kubernetes.io/instance: {{ $.Values.tenant.guid }}
+    tenant-guid: {{ $.Values.tenant.guid | quote }}
+spec:
+  hard:
+    limits.cpu: {{ $.Values.resourceQuota.limits.cpu | quote }}
+    limits.memory: {{ $.Values.resourceQuota.limits.memory | quote }}
+    requests.cpu: {{ $.Values.resourceQuota.requests.cpu | quote }}
+    requests.memory: {{ $.Values.resourceQuota.requests.memory | quote }}
+    persistentvolumeclaims: {{ $.Values.resourceQuota.persistentvolumeclaims | quote }}
+    requests.storage: {{ $.Values.resourceQuota["requests.storage"] | quote }}
+    pods: {{ $.Values.resourceQuota.pods | quote }}
+    services: {{ $.Values.resourceQuota.services | quote }}
+    secrets: {{ $.Values.resourceQuota.secrets | quote }}
+    configmaps: {{ $.Values.resourceQuota.configmaps | quote }}
+{{- end }}
+{{- else if eq .Values.namespaces.mode "explicit" }}
+{{- range $name := .Values.namespaces.explicit.names }}
+{{- $nsName := printf "%s-%s" $name $.Values.tenant.guid }}
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: tenant-quota
+  namespace: {{ $nsName }}
+  labels:
+    app.kubernetes.io/managed-by: argocd
+    app.kubernetes.io/component: tenant
+    app.kubernetes.io/instance: {{ $.Values.tenant.guid }}
+    tenant-guid: {{ $.Values.tenant.guid | quote }}
+spec:
+  hard:
+    limits.cpu: {{ $.Values.resourceQuota.limits.cpu | quote }}
+    limits.memory: {{ $.Values.resourceQuota.limits.memory | quote }}
+    requests.cpu: {{ $.Values.resourceQuota.requests.cpu | quote }}
+    requests.memory: {{ $.Values.resourceQuota.requests.memory | quote }}
+    persistentvolumeclaims: {{ $.Values.resourceQuota.persistentvolumeclaims | quote }}
+    requests.storage: {{ $.Values.resourceQuota["requests.storage"] | quote }}
+    pods: {{ $.Values.resourceQuota.pods | quote }}
+    services: {{ $.Values.resourceQuota.services | quote }}
+    secrets: {{ $.Values.resourceQuota.secrets | quote }}
+    configmaps: {{ $.Values.resourceQuota.configmaps | quote }}
+{{- end }}
+{{- end }}
+{{- end }}

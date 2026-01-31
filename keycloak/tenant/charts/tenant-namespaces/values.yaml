@@ -1,0 +1,97 @@
+---
+# Tenant identifier - REQUIRED
+# This GUID uniquely identifies this tenant and is used to namespace resources
+# Example: "dev-team-a" or "project-12345" or a UUID
+tenant:
+  guid: "default"
+
+# Tenant namespace configuration
+namespaces:
+  # Namespace creation mode:
+  # - "generate": Create N namespaces with pattern {prefix}{number}-{guid}{suffix}
+  # - "explicit": Use the explicit list of namespace names
+  mode: generate
+
+  # GENERATE MODE: Create namespaces from count + prefix + GUID
+  # Examples: user1-abc123-project, user2-abc123-project
+  generate:
+    count: 5
+    prefix: user
+    suffix: -project
+    startNumber: 1
+
+  # EXPLICIT MODE: Provide specific namespace names (GUID will be appended)
+  # Examples: if names=[dev, staging] and guid=abc123, creates: dev-abc123, staging-abc123
+  explicit:
+    names: []
+      # - dev
+      # - staging
+      # - prod
+
+  # Optional: namespace labels
+  labels:
+    tenant: "true"
+    managed-by: argocd
+
+  # Optional: namespace annotations
+  annotations: {}
+    # openshift.io/description: "Tenant user namespace"
+
+# Resource Quota configuration
+resourceQuota:
+  enabled: true
+
+  # Compute resources
+  limits:
+    cpu: "4"
+    memory: 8Gi
+  requests:
+    cpu: "2"
+    memory: 4Gi
+
+  # Storage
+  persistentvolumeclaims: "5"
+  requests.storage: 50Gi
+
+  # Object counts
+  pods: "10"
+  services: "10"
+  secrets: "20"
+  configmaps: "20"
+
+# Limit Range configuration
+limitRange:
+  enabled: true
+
+  # Default limits for containers
+  defaultLimits:
+    cpu: 500m
+    memory: 512Mi
+
+  # Default requests for containers
+  defaultRequests:
+    cpu: 100m
+    memory: 128Mi
+
+  # Max limits for containers
+  maxLimits:
+    cpu: "2"
+    memory: 2Gi
+
+  # Min limits for containers
+  minLimits:
+    cpu: 10m
+    memory: 64Mi
+
+# Network Policies
+networkPolicy:
+  enabled: false
+
+  # Allow ingress from OpenShift ingress controller
+  allowIngress: true
+
+  # Allow egress to internet
+  allowEgress: true
+
+  # Allow communication between tenant namespaces
+  allowTenantCommunication: false

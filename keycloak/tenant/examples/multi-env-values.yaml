@@ -1,0 +1,116 @@
+---
+# Example: Multi-Environment Tenant
+# GUID-based tenant with explicit environment namespaces
+
+tenant:
+  guid: "product-team-alpha"
+
+# Keycloak configuration
+keycloak:
+  namespace: keycloak
+  realmName: sso
+
+# User configuration - Explicit named users
+users:
+  mode: explicit
+
+  explicit:
+    usernames:
+      - alice
+      - bob
+      - charlie
+      - diana
+      - eric
+
+  password: "ProductAlpha-2026!"
+  emailDomain: alpha.product.example.com
+  emailVerified: true
+  lastName: ProductTeam
+
+  realmRoles:
+    - user
+
+  groups:
+    - product-alpha-team
+
+# Namespace configuration - Explicit environment namespaces
+namespaces:
+  mode: explicit
+
+  explicit:
+    names:
+      - dev
+      - qa
+      - staging
+      - prod
+      - tools
+
+  labels:
+    tenant: "true"
+    product: "alpha"
+    managed-by: argocd
+
+  annotations:
+    openshift.io/description: "Product Alpha Environment"
+
+# Resource quotas - Production-grade
+resourceQuota:
+  enabled: true
+  limits:
+    cpu: "16"
+    memory: 32Gi
+  requests:
+    cpu: "8"
+    memory: 16Gi
+  persistentvolumeclaims: "20"
+  requests.storage: 500Gi
+  pods: "50"
+  services: "30"
+  secrets: "50"
+  configmaps: "50"
+
+# Limit ranges
+limitRange:
+  enabled: true
+  defaultLimits:
+    cpu: 2000m
+    memory: 2Gi
+  defaultRequests:
+    cpu: 500m
+    memory: 512Mi
+  maxLimits:
+    cpu: "8"
+    memory: 8Gi
+  minLimits:
+    cpu: 100m
+    memory: 256Mi
+
+# Network policies
+networkPolicy:
+  enabled: true
+  allowIngress: true
+  allowEgress: true
+  allowTenantCommunication: true  # Environments can communicate
+
+# RBAC configuration - All users get admin to all environments
+rbac:
+  namespaceAdmin:
+    enabled: false  # Disable auto-mapping (explicit mode doesn't auto-map)
+
+  sharedNamespaceAccess:
+    enabled: true
+    # Grant all users access to all tenant namespaces
+    namespaces:
+      - dev-product-team-alpha
+      - qa-product-team-alpha
+      - staging-product-team-alpha
+      - prod-product-team-alpha
+      - tools-product-team-alpha
+    clusterRole: admin
+
+# User attributes
+attributes:
+  product: "alpha"
+  department: "engineering"
+  cost_center: "67890"
+  tenant_id: "{{ .Values.tenant.guid }}"

@@ -1,0 +1,29 @@
+---
+# Master parent application that deploys both infrastructure and tenant apps
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keycloak-platform
+  namespace: openshift-gitops
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app.kubernetes.io/name: keycloak-platform
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/YOUR-ORG/YOUR-REPO.git  # Update with your Git repository
+      targetRevision: main
+      path: argocd/infra/apps
+    - repoURL: https://github.com/YOUR-ORG/YOUR-REPO.git  # Update with your Git repository
+      targetRevision: main
+      path: argocd/tenant/apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openshift-gitops
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

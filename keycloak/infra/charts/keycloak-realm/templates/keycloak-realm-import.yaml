@@ -1,0 +1,54 @@
+---
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: KeycloakRealmImport
+metadata:
+  name: {{ .Values.realm.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: keycloak-realm
+    app.kubernetes.io/component: infrastructure
+spec:
+  keycloakCRName: keycloak
+  realm:
+    id: {{ .Values.realm.name }}
+    realm: {{ .Values.realm.name }}
+    enabled: {{ .Values.realm.enabled }}
+    sslRequired: {{ .Values.realm.sslRequired }}
+    registrationAllowed: {{ .Values.realm.registrationAllowed }}
+    loginWithEmailAllowed: {{ .Values.realm.loginWithEmailAllowed }}
+    duplicateEmailsAllowed: {{ .Values.realm.duplicateEmailsAllowed }}
+    clients:
+      - clientId: {{ .Values.realm.client.id }}
+        enabled: {{ .Values.realm.client.enabled }}
+        clientAuthenticatorType: client-secret
+        secret: {{ .Values.realm.client.secret }}
+        publicClient: {{ .Values.realm.client.publicClient }}
+        redirectUris:
+          {{- toYaml .Values.realm.client.redirectUris | nindent 10 }}
+        standardFlowEnabled: {{ .Values.realm.client.standardFlowEnabled }}
+        directAccessGrantsEnabled: {{ .Values.realm.client.directAccessGrantsEnabled }}
+        serviceAccountsEnabled: {{ .Values.realm.client.serviceAccountsEnabled }}
+        frontchannelLogout: {{ .Values.realm.client.frontchannelLogout }}
+        protocol: {{ .Values.realm.client.protocol }}
+    roles:
+      realm:
+        {{- toYaml .Values.realm.roles | nindent 8 }}
+    {{- if .Values.realm.admin.enabled }}
+    users:
+      - username: {{ .Values.realm.admin.username }}
+        enabled: true
+        emailVerified: {{ .Values.realm.admin.emailVerified }}
+        email: {{ .Values.realm.admin.email }}
+        firstName: {{ .Values.realm.admin.firstName }}
+        lastName: {{ .Values.realm.admin.lastName }}
+        credentials:
+          - type: password
+            value: {{ .Values.realm.admin.password }}
+            temporary: {{ .Values.realm.admin.temporary }}
+        realmRoles:
+          {{- toYaml .Values.realm.admin.realmRoles | nindent 10 }}
+    {{- else }}
+    users: []
+    {{- end }}
+    groups:
+      {{- toYaml .Values.realm.groups | nindent 6 }}

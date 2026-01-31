@@ -1,0 +1,15 @@
+---
+namespace: keycloak
+
+operator:
+  name: rhbk-operator
+  channel: stable-v26.2
+  installPlanApproval: Automatic
+  startingCSV: ""
+
+  # Optional: Use custom catalog source
+  catalogSource:
+    enabled: false
+    name: custom-redhat-catalog
+    image: quay.io/gpte-devops-automation/olm_snapshot_redhat_catalog
+    tag: v4.20_2025_10_23

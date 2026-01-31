@@ -1,0 +1,16 @@
+{{- if .Values.operator.catalogSource.enabled }}
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: {{ .Values.operator.catalogSource.name }}
+  namespace: openshift-marketplace
+spec:
+  sourceType: grpc
+  image: {{ .Values.operator.catalogSource.image }}:{{ .Values.operator.catalogSource.tag }}
+  displayName: Custom Red Hat Catalog
+  publisher: Red Hat
+  updateStrategy:
+    registryPoll:
+      interval: 30m
+{{- end }}

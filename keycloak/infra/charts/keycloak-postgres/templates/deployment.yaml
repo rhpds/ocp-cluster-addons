@@ -1,0 +1,57 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: keycloak-pgsql
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak-pgsql
+  template:
+    metadata:
+      labels:
+        app: keycloak-pgsql
+    spec:
+      volumes:
+        - name: pgsql-storage
+          persistentVolumeClaim:
+            claimName: keycloak-pgsql-data
+      containers:
+        - name: pgsql
+          image: {{ .Values.postgresql.image }}
+          imagePullPolicy: IfNotPresent
+          resources:
+            {{- toYaml .Values.postgresql.resources | nindent 12 }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.postgresql.service.port }}
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+            periodSeconds: 20
+            successThreshold: 1
+            failureThreshold: 3
+          env:
+            - name: POSTGRESQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-pgsql-user
+                  key: user
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-pgsql-user
+                  key: password
+            - name: POSTGRESQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-pgsql-user
+                  key: dbname
+          ports:
+            - containerPort: {{ .Values.postgresql.service.port }}
+              protocol: TCP
+          volumeMounts:
+            - name: pgsql-storage
+              mountPath: /var/lib/pgsql/data
+      restartPolicy: Always

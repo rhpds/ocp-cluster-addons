@@ -1,0 +1,66 @@
+---
+# Tenant identifier - REQUIRED
+# This GUID uniquely identifies this tenant and is used to namespace resources
+# Example: "dev-team-a" or "project-12345" or a UUID
+tenant:
+  guid: "default"
+
+# Keycloak configuration
+keycloak:
+  namespace: keycloak
+  realmName: sso
+
+# Tenant user configuration
+users:
+  # User creation mode:
+  # - "generate": Create users from count + prefix + GUID
+  # - "explicit": Use the explicit list of usernames
+  mode: generate
+
+  # GENERATE MODE: Create N users with pattern {prefix}{number}-{guid}
+  # Examples: user1-abc123, user2-abc123, user3-abc123
+  generate:
+    # Number of tenant users to create
+    count: 5
+    # Username prefix
+    prefix: user
+    # Start number (default: 1)
+    startNumber: 1
+
+  # EXPLICIT MODE: Provide specific usernames
+  # Final usernames will be {username}-{guid}
+  # Examples: john-abc123, jane-abc123, bob-abc123
+  explicit:
+    usernames: []
+      # - john
+      # - jane
+      # - bob
+
+  # IMPORTANT: Change this in production or use external secret management
+  password: changeme123
+
+  # Email configuration
+  emailDomain: demo.redhat.com
+  emailVerified: true
+
+  # User profile defaults (used in generate mode)
+  firstName: User
+  lastName: Demo
+
+  # Password settings
+  temporary: false
+
+  # Keycloak realm roles for tenant users
+  realmRoles:
+    - user
+
+  # Optional: Assign users to groups
+  groups: []
+    # - users
+
+# Optional: Additional user attributes
+# Can be used for custom claims or application-specific data
+attributes: {}
+  # department: engineering
+  # cost_center: "12345"
+  # tenant_id: "{{ .Values.tenant.guid }}"

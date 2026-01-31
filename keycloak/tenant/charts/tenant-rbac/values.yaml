@@ -1,0 +1,74 @@
+---
+# Tenant identifier - REQUIRED
+# Must match the GUID used in keycloak-users and tenant-namespaces charts
+tenant:
+  guid: "default"
+
+# Tenant user configuration
+users:
+  # User creation mode (must match keycloak-users chart):
+  # - "generate": Users created from count + prefix + GUID
+  # - "explicit": Explicit list of usernames
+  mode: generate
+
+  generate:
+    count: 5
+    prefix: user
+    startNumber: 1
+
+  explicit:
+    usernames: []
+      # - john
+      # - jane
+
+# Namespace configuration (must match tenant-namespaces chart)
+namespaces:
+  # Must match mode from tenant-namespaces chart
+  mode: generate
+
+  generate:
+    count: 5
+    prefix: user
+    suffix: -project
+    startNumber: 1
+
+  explicit:
+    names: []
+      # - dev
+      # - staging
+
+# RBAC configuration
+rbac:
+  # Grant admin access to user's own namespace
+  namespaceAdmin:
+    enabled: true
+    clusterRole: admin  # admin, edit, or view
+
+  # Grant view access to shared namespaces
+  sharedNamespaceAccess:
+    enabled: false
+    namespaces: []
+      # - shared-tools
+      # - shared-images
+    clusterRole: view
+
+  # Create custom RoleBinding for specific permissions
+  customRoleBindings:
+    enabled: false
+    roles: []
+      # - name: custom-role
+      #   namespace: shared-namespace
+      #   clusterRole: view
+
+# Group-based RBAC (if using Keycloak groups)
+groupRbac:
+  enabled: false
+  bindings: []
+    # - group: developers
+    #   namespaces:
+    #     - dev-shared
+    #   clusterRole: edit
+    # - group: viewers
+    #   namespaces:
+    #     - prod-shared
+    #   clusterRole: view

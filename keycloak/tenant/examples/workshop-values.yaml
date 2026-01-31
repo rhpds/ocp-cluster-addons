@@ -1,0 +1,108 @@
+---
+# Example: Workshop/Training Environment
+# GUID-based tenant with 50 students
+
+tenant:
+  guid: "workshop-2026-01"
+
+# Keycloak configuration
+keycloak:
+  namespace: keycloak
+  realmName: sso
+
+# User configuration - Generate 50 workshop users
+users:
+  mode: generate
+
+  generate:
+    count: 50
+    prefix: student
+    startNumber: 1
+
+  password: "Workshop2026!"
+  emailDomain: workshop.example.com
+  emailVerified: true
+  firstName: Student
+  lastName: Workshop
+
+  realmRoles:
+    - user
+
+  groups:
+    - workshop-attendees
+
+# Namespace configuration - Generate 50 student workspaces
+namespaces:
+  mode: generate
+
+  generate:
+    count: 50
+    prefix: student
+    suffix: -lab
+    startNumber: 1
+
+  labels:
+    tenant: "true"
+    workshop: "2026-01"
+    environment: "training"
+
+  annotations:
+    openshift.io/description: "Workshop Student Lab Environment"
+
+# Resource quotas - Limited for workshop users
+resourceQuota:
+  enabled: true
+  limits:
+    cpu: "2"
+    memory: 4Gi
+  requests:
+    cpu: "1"
+    memory: 2Gi
+  persistentvolumeclaims: "3"
+  requests.storage: 20Gi
+  pods: "10"
+  services: "5"
+  secrets: "15"
+  configmaps: "15"
+
+# Limit ranges - Prevent resource hogging
+limitRange:
+  enabled: true
+  defaultLimits:
+    cpu: 500m
+    memory: 512Mi
+  defaultRequests:
+    cpu: 100m
+    memory: 128Mi
+  maxLimits:
+    cpu: "1"
+    memory: 1Gi
+  minLimits:
+    cpu: 10m
+    memory: 64Mi
+
+# Network policies - Isolated student environments
+networkPolicy:
+  enabled: true
+  allowIngress: true
+  allowEgress: true
+  allowTenantCommunication: false  # Students can't see each other
+
+# RBAC configuration - Students are admins of their own namespace only
+rbac:
+  namespaceAdmin:
+    enabled: true
+    clusterRole: admin
+
+  sharedNamespaceAccess:
+    enabled: true
+    namespaces:
+      - workshop-shared-resources
+      - workshop-images
+    clusterRole: view  # Read-only access to shared resources
+
+# User attributes
+attributes:
+  workshop: "OpenShift Advanced 2026"
+  session: "january"
+  tenant_id: "{{ .Values.tenant.guid }}"

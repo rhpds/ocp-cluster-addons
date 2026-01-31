@@ -1,0 +1,157 @@
+---
+# Example: ApplicationSet for deploying multiple tenants
+# This creates 3 complete tenants (users + namespaces + rbac) from a single manifest
+
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: multi-tenant-platform
+  namespace: openshift-gitops
+spec:
+  generators:
+    # Matrix generator: Combine tenants with charts
+    - matrix:
+        generators:
+          # List of tenants to deploy
+          - list:
+              elements:
+                - guid: "team-red"
+                  userCount: "5"
+                  userPrefix: "developer"
+                  password: "TeamRed-Pass123!"
+                  nsPrefix: "team-red"
+                  nsSuffix: "-env"
+
+                - guid: "team-blue"
+                  userCount: "3"
+                  userPrefix: "engineer"
+                  password: "TeamBlue-Pass123!"
+                  nsPrefix: "team-blue"
+                  nsSuffix: "-workspace"
+
+                - guid: "team-green"
+                  userCount: "10"
+                  userPrefix: "student"
+                  password: "TeamGreen-Pass123!"
+                  nsPrefix: "team-green"
+                  nsSuffix: "-lab"
+
+          # List of charts to deploy per tenant
+          - list:
+              elements:
+                - chart: keycloak-users
+                  namespace: keycloak
+                - chart: tenant-namespaces
+                  namespace: default
+                - chart: tenant-rbac
+                  namespace: default
+
+  template:
+    metadata:
+      name: '{{guid}}-{{chart}}'
+      labels:
+        tenant-guid: '{{guid}}'
+        component: tenant
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/YOUR-ORG/YOUR-REPO.git
+        targetRevision: main
+        path: argocd/tenant/charts/{{chart}}
+        helm:
+          valueFiles:
+            - values.yaml
+          values: |
+            tenant:
+              guid: "{{guid}}"
+
+            keycloak:
+              namespace: keycloak
+              realmName: sso
+
+            users:
+              mode: generate
+              generate:
+                count: {{userCount}}
+                prefix: {{userPrefix}}
+                startNumber: 1
+              password: "{{password}}"
+              emailDomain: {{guid}}.example.com
+              emailVerified: true
+              firstName: User
+              lastName: {{guid}}
+              realmRoles:
+                - user
+
+            namespaces:
+              mode: generate
+              generate:
+                count: {{userCount}}
+                prefix: {{nsPrefix}}
+                suffix: "{{nsSuffix}}"
+                startNumber: 1
+              labels:
+                tenant: "true"
+                tenant-guid: "{{guid}}"
+
+            resourceQuota:
+              enabled: true
+              limits:
+                cpu: "4"
+                memory: 8Gi
+              requests:
+                cpu: "2"
+                memory: 4Gi
+              persistentvolumeclaims: "5"
+              requests.storage: 50Gi
+              pods: "10"
+              services: "10"
+              secrets: "20"
+              configmaps: "20"
+
+            limitRange:
+              enabled: true
+              defaultLimits:
+                cpu: 500m
+                memory: 512Mi
+              defaultRequests:
+                cpu: 100m
+                memory: 128Mi
+              maxLimits:
+                cpu: "2"
+                memory: 2Gi
+              minLimits:
+                cpu: 10m
+                memory: 64Mi
+
+            networkPolicy:
+              enabled: false
+
+            rbac:
+              namespaceAdmin:
+                enabled: true
+                clusterRole: admin
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=false
+        retry:
+          limit: 5
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 3m
+
+      # Sync waves: Deploy in order
+      syncOptions:
+        - CreateNamespace=false
+      # Optional: Add annotations for sync waves
+      # annotations:
+      #   argocd.argoproj.io/sync-wave: "0"  # Adjust per chart if needed

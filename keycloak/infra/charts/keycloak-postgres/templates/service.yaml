@@ -1,0 +1,14 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: keycloak-pgsql
+  namespace: {{ .Values.namespace }}
+spec:
+  ports:
+    - name: data
+      protocol: TCP
+      port: {{ .Values.postgresql.service.port }}
+      targetPort: {{ .Values.postgresql.service.port }}
+  selector:
+    app: keycloak-pgsql

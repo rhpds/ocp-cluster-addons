@@ -1,0 +1,15 @@
+{{- if .Values.rbac.clusterAdmin.enabled }}
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cluster-admin-keycloak-{{ .Values.rbac.clusterAdmin.username }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: {{ .Values.rbac.clusterAdmin.username | quote }}
+{{- end }}

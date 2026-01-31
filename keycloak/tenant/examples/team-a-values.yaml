@@ -1,0 +1,106 @@
+---
+# Example: Development Team A
+# GUID-based tenant with generated users and namespaces
+
+tenant:
+  guid: "team-a"
+
+# Keycloak configuration
+keycloak:
+  namespace: keycloak
+  realmName: sso
+
+# User configuration - Generate 5 users
+users:
+  mode: generate
+
+  generate:
+    count: 5
+    prefix: developer
+    startNumber: 1
+
+  password: "TeamA-DevPassword123!"
+  emailDomain: team-a.example.com
+  emailVerified: true
+  firstName: Developer
+  lastName: TeamA
+
+  realmRoles:
+    - user
+
+  groups:
+    - developers
+
+# Namespace configuration - Generate 5 namespaces
+namespaces:
+  mode: generate
+
+  generate:
+    count: 5
+    prefix: team-a-dev
+    suffix: -workspace
+    startNumber: 1
+
+  labels:
+    tenant: "true"
+    team: "team-a"
+    environment: "development"
+
+  annotations:
+    openshift.io/description: "Team A Development Workspace"
+
+# Resource quotas
+resourceQuota:
+  enabled: true
+  limits:
+    cpu: "8"
+    memory: 16Gi
+  requests:
+    cpu: "4"
+    memory: 8Gi
+  persistentvolumeclaims: "10"
+  requests.storage: 100Gi
+  pods: "20"
+  services: "15"
+  secrets: "30"
+  configmaps: "30"
+
+# Limit ranges
+limitRange:
+  enabled: true
+  defaultLimits:
+    cpu: 1000m
+    memory: 1Gi
+  defaultRequests:
+    cpu: 200m
+    memory: 256Mi
+  maxLimits:
+    cpu: "4"
+    memory: 4Gi
+  minLimits:
+    cpu: 50m
+    memory: 128Mi
+
+# Network policies
+networkPolicy:
+  enabled: false
+
+# RBAC configuration
+rbac:
+  namespaceAdmin:
+    enabled: true
+    clusterRole: admin
+
+  sharedNamespaceAccess:
+    enabled: true
+    namespaces:
+      - team-a-shared-tools
+      - team-a-shared-images
+    clusterRole: edit
+
+# User attributes (optional)
+attributes:
+  department: engineering
+  team: team-a
+  cost_center: "12345"
+  tenant_id: "{{ .Values.tenant.guid }}"

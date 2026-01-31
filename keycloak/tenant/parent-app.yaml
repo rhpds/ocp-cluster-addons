@@ -1,0 +1,26 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keycloak-tenants
+  namespace: openshift-gitops
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app.kubernetes.io/part-of: keycloak-platform
+    component: tenant
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/YOUR-ORG/YOUR-REPO.git  # Update with your Git repository
+    targetRevision: main
+    path: argocd/tenant/apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openshift-gitops
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

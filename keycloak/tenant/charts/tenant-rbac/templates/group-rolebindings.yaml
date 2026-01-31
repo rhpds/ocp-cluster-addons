@@ -1,0 +1,24 @@
+{{- if .Values.groupRbac.enabled }}
+{{- range $binding := .Values.groupRbac.bindings }}
+{{- range $ns := $binding.namespaces }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: group-{{ $binding.group }}-{{ $binding.clusterRole }}
+  namespace: {{ $ns }}
+  labels:
+    app.kubernetes.io/managed-by: argocd
+    app.kubernetes.io/component: tenant
+    tenant-group: {{ $binding.group }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ $binding.clusterRole }}
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: Group
+    name: /{{ $binding.group }}
+{{- end }}
+{{- end }}
+{{- end }}

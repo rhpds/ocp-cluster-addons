@@ -1,0 +1,13 @@
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: keycloak-pgsql-data
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - {{ .Values.postgresql.storage.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.postgresql.storage.size }}
+  volumeMode: Filesystem

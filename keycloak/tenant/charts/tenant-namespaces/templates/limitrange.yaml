@@ -1,0 +1,64 @@
+{{- if .Values.limitRange.enabled }}
+{{- if eq .Values.namespaces.mode "generate" }}
+{{- range $i := until (.Values.namespaces.generate.count | int) }}
+{{- $num := add ($.Values.namespaces.generate.startNumber | int) $i }}
+{{- $nsName := printf "%s%d-%s%s" $.Values.namespaces.generate.prefix $num $.Values.tenant.guid $.Values.namespaces.generate.suffix }}
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: tenant-limits
+  namespace: {{ $nsName }}
+  labels:
+    app.kubernetes.io/managed-by: argocd
+    app.kubernetes.io/component: tenant
+    app.kubernetes.io/instance: {{ $.Values.tenant.guid }}
+    tenant-guid: {{ $.Values.tenant.guid | quote }}
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: {{ $.Values.limitRange.defaultLimits.cpu }}
+        memory: {{ $.Values.limitRange.defaultLimits.memory }}
+      defaultRequest:
+        cpu: {{ $.Values.limitRange.defaultRequests.cpu }}
+        memory: {{ $.Values.limitRange.defaultRequests.memory }}
+      max:
+        cpu: {{ $.Values.limitRange.maxLimits.cpu }}
+        memory: {{ $.Values.limitRange.maxLimits.memory }}
+      min:
+        cpu: {{ $.Values.limitRange.minLimits.cpu }}
+        memory: {{ $.Values.limitRange.minLimits.memory }}
+{{- end }}
+{{- else if eq .Values.namespaces.mode "explicit" }}
+{{- range $name := .Values.namespaces.explicit.names }}
+{{- $nsName := printf "%s-%s" $name $.Values.tenant.guid }}
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: tenant-limits
+  namespace: {{ $nsName }}
+  labels:
+    app.kubernetes.io/managed-by: argocd
+    app.kubernetes.io/component: tenant
+    app.kubernetes.io/instance: {{ $.Values.tenant.guid }}
+    tenant-guid: {{ $.Values.tenant.guid | quote }}
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: {{ $.Values.limitRange.defaultLimits.cpu }}
+        memory: {{ $.Values.limitRange.defaultLimits.memory }}
+      defaultRequest:
+        cpu: {{ $.Values.limitRange.defaultRequests.cpu }}
+        memory: {{ $.Values.limitRange.defaultRequests.memory }}
+      max:
+        cpu: {{ $.Values.limitRange.maxLimits.cpu }}
+        memory: {{ $.Values.limitRange.maxLimits.memory }}
+      min:
+        cpu: {{ $.Values.limitRange.minLimits.cpu }}
+        memory: {{ $.Values.limitRange.minLimits.memory }}
+{{- end }}
+{{- end }}
+{{- end }}

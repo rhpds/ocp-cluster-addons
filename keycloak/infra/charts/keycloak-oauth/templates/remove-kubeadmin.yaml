@@ -1,0 +1,51 @@
+{{- if .Values.rbac.removeKubeadmin.enabled }}
+---
+# WARNING: This will remove the kubeadmin user
+# Only enable this after confirming OAuth authentication works
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: remove-kubeadmin
+  namespace: kube-system
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  template:
+    spec:
+      serviceAccountName: remove-kubeadmin
+      restartPolicy: Never
+      containers:
+      - name: oc
+        image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+        command:
+        - /bin/bash
+        - -c
+        - |
+          oc delete secret kubeadmin -n kube-system --ignore-not-found=true
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: remove-kubeadmin
+  namespace: kube-system
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: remove-kubeadmin
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: remove-kubeadmin
+  namespace: kube-system
+{{- end }}

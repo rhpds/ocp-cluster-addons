@@ -1,0 +1,40 @@
+---
+oauth:
+  # REQUIRED: Update this with your OpenShift cluster's ingress domain
+  # Example: apps.cluster-abc123.abc123.sandbox1234.opentlc.com
+  ingressDomain: apps.example.com
+
+  identityProvider:
+    name: rhbk
+    type: OpenID
+    mappingMethod: claim
+
+  client:
+    id: idp-4-ocp
+    # IMPORTANT: Must match the client secret in keycloak-realm chart
+    secret: changeme123
+    secretName: openid-client-secret-bb6zw
+
+  keycloak:
+    hostname: sso
+    realmName: sso
+
+  claims:
+    email:
+      - email
+    name:
+      - name
+    preferredUsername:
+      - preferred_username
+
+  extraScopes: []
+
+rbac:
+  # Create cluster-admin role binding for Keycloak admin user
+  clusterAdmin:
+    enabled: true
+    username: admin
+
+  # Optional: Remove kubeadmin user after OAuth is configured
+  removeKubeadmin:
+    enabled: false
