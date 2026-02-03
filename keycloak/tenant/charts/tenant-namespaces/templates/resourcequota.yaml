@@ -21,7 +21,7 @@ spec:
     requests.cpu: {{ $.Values.resourceQuota.requests.cpu | quote }}
     requests.memory: {{ $.Values.resourceQuota.requests.memory | quote }}
     persistentvolumeclaims: {{ $.Values.resourceQuota.persistentvolumeclaims | quote }}
-    requests.storage: {{ $.Values.resourceQuota["requests.storage"] | quote }}
+    requests.storage: {{ index $.Values.resourceQuota "requests.storage" | quote }}
     pods: {{ $.Values.resourceQuota.pods | quote }}
     services: {{ $.Values.resourceQuota.services | quote }}
     secrets: {{ $.Values.resourceQuota.secrets | quote }}
@@ -48,7 +48,7 @@ spec:
     requests.cpu: {{ $.Values.resourceQuota.requests.cpu | quote }}
     requests.memory: {{ $.Values.resourceQuota.requests.memory | quote }}
     persistentvolumeclaims: {{ $.Values.resourceQuota.persistentvolumeclaims | quote }}
-    requests.storage: {{ $.Values.resourceQuota["requests.storage"] | quote }}
+    requests.storage: {{ index $.Values.resourceQuota "requests.storage" | quote }}
     pods: {{ $.Values.resourceQuota.pods | quote }}
     services: {{ $.Values.resourceQuota.services | quote }}
     secrets: {{ $.Values.resourceQuota.secrets | quote }}
