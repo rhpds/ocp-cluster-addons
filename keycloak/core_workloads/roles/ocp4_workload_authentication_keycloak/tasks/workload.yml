@@ -1,0 +1,183 @@
+---
+- name: Install keycloak operator
+  ansible.builtin.include_role:
+    name: install_operator
+  vars:
+    install_operator_name: rhbk-operator
+    install_operator_namespace: "{{ ocp4_workload_authentication_keycloak_namespace }}"
+    install_operator_manage_namespaces:
+    - "{{ ocp4_workload_authentication_keycloak_namespace }}"
+    install_operator_channel: "{{ ocp4_workload_authentication_keycloak_channel }}"
+    install_operator_automatic_install_plan_approval: "{{ ocp4_workload_authentication_keycloak_automatic_install_plan_approval | default('true') }}"
+    install_operator_starting_csv: "{{ ocp4_workload_authentication_keycloak_starting_csv }}"
+    install_operator_catalogsource_setup: "{{ ocp4_workload_authentication_keycloak_use_catalog_source }}"
+    install_operator_catalogsource_image: "{{ ocp4_workload_authentication_keycloak_catalogsource_image }}"
+    install_operator_catalogsource_image_tag: "{{ ocp4_workload_authentication_keycloak_catalogsource_tag }}"
+
+- name: Generate admin password
+  when: ocp4_workload_authentication_keycloak_admin_password | default('') | length == 0
+  ansible.builtin.set_fact:
+    _ocp4_workload_authentication_keycloak_admin_password: >-
+      {{ lookup('password', '/dev/null chars=ascii_letters,digits length=10') }}
+
+- name: Use provided admin password
+  when: ocp4_workload_authentication_keycloak_admin_password | default('') | length > 0
+  ansible.builtin.set_fact:
+    _ocp4_workload_authentication_keycloak_admin_password: >-
+      {{ ocp4_workload_authentication_keycloak_admin_password }}
+
+- name: Generate user password
+  when: ocp4_workload_authentication_keycloak_user_password | default('') | length == 0
+  ansible.builtin.set_fact:
+    _ocp4_workload_authentication_keycloak_user_password: >-
+      {{ lookup('password', '/dev/null chars=ascii_letters,digits length=10') }}
+
+- name: Use provided user password
+  when: ocp4_workload_authentication_keycloak_user_password | default('') | length > 0
+  ansible.builtin.set_fact:
+    _ocp4_workload_authentication_keycloak_user_password: >-
+      {{ ocp4_workload_authentication_keycloak_user_password }}
+
+- name: Generate openshift client secret
+  when: ocp4_workload_authentication_keycloak_openshift_client_secret | default('') | length == 0
+  ansible.builtin.set_fact:
+    _ocp4_workload_authentication_keycloak_openshift_client_secret: >-
+      {{ lookup('password', '/dev/null chars=ascii_letters,digits length=10') }}
+
+- name: Use provided openshift client secret
+  when: ocp4_workload_authentication_keycloak_openshift_client_secret | default('') | length > 0
+  ansible.builtin.set_fact:
+    _ocp4_workload_authentication_keycloak_openshift_client_secret: >-
+      {{ ocp4_workload_authentication_keycloak_openshift_client_secret }}
+
+- name: Create Keycloak namespace
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ ocp4_workload_authentication_keycloak_namespace }}"
+    state: present
+
+- name: Create Keycloak PSQL deployment
+  kubernetes.core.k8s:
+    state: present
+    namespace: "{{ ocp4_workload_authentication_keycloak_namespace }}"
+    template: "{{ item }}"
+  loop:
+  - postgres_database_user_details.yml.j2
+  - postgres_database_pvc.yml.j2
+  - postgres_database_deployment.yml.j2
+  - postgres_database_service.yml.j2
+
+- name: Create Keycloak instance
+  kubernetes.core.k8s:
+    state: present
+    namespace: "{{ ocp4_workload_authentication_keycloak_namespace }}"
+    template: "{{ item }}"
+  loop:
+  - keycloak_tls_service.yml.j2
+  - keycloak_instance.yml.j2
+  - keycloak_route.yml.j2
+  - keycloak_realm_import.yml.j2
+  register: r_keycloak_instance
+  retries: 120
+  delay: 10
+  until: r_keycloak_instance is not failed
+
+- name: Remove kubeadmin user
+  when: ocp4_workload_authentication_keycloak_remove_kubeadmin | bool
+  kubernetes.core.k8s:
+    state: absent
+    api_version: v1
+    kind: Secret
+    name: kubeadmin
+    namespace: kube-system
+
+- name: Create admin role binding if create admin is true
+  when: ocp4_workload_authentication_keycloak_admin_create | bool
+  kubernetes.core.k8s:
+    state: present
+    template: "openshift-admin-crb.yml.j2"
+
+- name: Create Openshift auth resources
+  kubernetes.core.k8s:
+    state: present
+    template: "{{ item }}"
+  loop:
+  - openshift-openid-client-secret.yml.j2
+  - openshift-oauth.yml.j2
+
+- name: Retrieve Keycloak admin credentials
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    name: keycloak-initial-admin
+    namespace: "{{ ocp4_workload_authentication_keycloak_namespace }}"
+  register: r_keycloak_credentials
+  retries: 120
+  delay: 10
+  until:
+  - r_keycloak_credentials is defined
+  - r_keycloak_credentials.resources is defined
+  - r_keycloak_credentials.resources | length > 0
+
+- name: Save user information messages
+  agnosticd.core.agnosticd_user_info:
+    msg: >-
+      Authentication via Keycloak is enabled on this cluster.
+      Keycloak admin console: https://sso.{{ openshift_cluster_ingress_domain }}
+      Keycloak admin user: {{ r_keycloak_credentials.resources[0].data.username | b64decode }}
+      Keycloak admin password: {{ r_keycloak_credentials.resources[0].data.password | b64decode }}
+    data:
+      keycloak_admin_console: https://sso.{{ openshift_cluster_ingress_domain }}
+      keycloak_admin_user: "{{ r_keycloak_credentials.resources[0].data.username | b64decode }}"
+      keycloak_admin_password: "{{ r_keycloak_credentials.resources[0].data.password | b64decode }}"
+      openshift_api_server_url: "{{ openshift_api_url }}"
+      openshift_cluster_console_url: "{{ openshift_console_url }}"
+      openshift_cluster_num_users: "{{ ocp4_workload_authentication_keycloak_num_users | int }}"
+      openshift_cluster_user_base: "{{ ocp4_workload_authentication_keycloak_user_username_base }}"
+      openshift_cluster_user_count: "{{ ocp4_workload_authentication_keycloak_num_users | int }}"
+
+- name: Print admin information
+  when:
+  - ocp4_workload_authentication_keycloak_admin_create | bool
+  - ocp4_workload_authentication_keycloak_enable_user_info_messages | bool
+  agnosticd.core.agnosticd_user_info:
+    msg: >-
+      User '{{ ocp4_workload_authentication_keycloak_admin_username }}'
+      with password '{{ _ocp4_workload_authentication_keycloak_admin_password }}'
+      is cluster admin.
+
+- name: Save admin information
+  when: ocp4_workload_authentication_keycloak_admin_create | bool
+  agnosticd.core.agnosticd_user_info:
+    data:
+      openshift_cluster_admin_username: "{{ ocp4_workload_authentication_keycloak_admin_username }}"
+      openshift_cluster_admin_password: "{{ _ocp4_workload_authentication_keycloak_admin_password }}"
+
+- name: Print user information
+  when:
+  - ocp4_workload_authentication_keycloak_num_users | int > 0
+  - ocp4_workload_authentication_keycloak_enable_user_info_messages | bool
+  agnosticd.core.agnosticd_user_info:
+    msg: >-
+      Users `{{ ocp4_workload_authentication_keycloak_user_username_base }}1` ..
+      `{{ ocp4_workload_authentication_keycloak_user_username_base ~ ocp4_workload_authentication_keycloak_num_users }}`
+      created with password `{{ _ocp4_workload_authentication_keycloak_user_password }}`
+
+- name: Save user information for user access
+  agnosticd.core.agnosticd_user_info:
+    user: "{{ ocp4_workload_authentication_keycloak_user_username_base }}{{ n + 1 }}"
+    data:
+      user: "{{ ocp4_workload_authentication_keycloak_user_username_base }}{{ n + 1 }}"
+      password: "{{ _ocp4_workload_authentication_keycloak_user_password }}"
+      console_url: "{{ openshift_console_url }}"
+      openshift_console_url: "{{ openshift_console_url }}"
+      openshift_cluster_ingress_domain: "{{ openshift_cluster_ingress_domain }}"
+      login_command: >-
+        oc login --insecure-skip-tls-verify=false
+        --username {{ ocp4_workload_authentication_keycloak_user_username_base }}{{ n + 1 }}
+        --password {{ _ocp4_workload_authentication_keycloak_user_password }}
+        {{ openshift_api_url }}
+  loop: "{{ range(0, ocp4_workload_authentication_keycloak_num_users | int) | list }}"
+  loop_control:
+    loop_var: n

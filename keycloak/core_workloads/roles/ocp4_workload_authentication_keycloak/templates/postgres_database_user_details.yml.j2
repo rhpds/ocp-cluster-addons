@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: keycloak-pgsql-user
+type: Opaque
+stringData:
+  dbname: keycloak
+  host: keycloak-pgsql.{{ ocp4_workload_authentication_keycloak_namespace }}.svc
+  port: "5432"
+  user: {{ ocp4_workload_authentication_keycloak_pgsql_user }}
+  password: {{ ocp4_workload_authentication_keycloak_pgsql_password }}

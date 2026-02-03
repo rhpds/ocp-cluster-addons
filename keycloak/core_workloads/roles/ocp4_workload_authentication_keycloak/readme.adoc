@@ -1,0 +1,3 @@
+= ocp4_workload_authentication_keycloak - Install Keycloak Operator and configure it for authentication
+
+See defaults/main.yml for variables to set.

@@ -1,0 +1,70 @@
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: KeycloakRealmImport
+metadata:
+  name: {{ ocp4_workload_authentication_keycloak_default_realm }}
+spec:
+  keycloakCRName: keycloak
+  realm:
+    id: {{ ocp4_workload_authentication_keycloak_default_realm }}
+    realm: {{ ocp4_workload_authentication_keycloak_default_realm }}
+    enabled: true
+    sslRequired: external
+    registrationAllowed: true
+    loginWithEmailAllowed: true
+    duplicateEmailsAllowed: false
+    clients:
+      - clientId: {{ ocp4_workload_authentication_keycloak_openshift_client_id }}
+        enabled: true
+        clientAuthenticatorType: client-secret
+        secret: {{ _ocp4_workload_authentication_keycloak_openshift_client_secret }}
+        publicClient: false
+        redirectUris:
+        - "*"
+        standardFlowEnabled: true
+        directAccessGrantsEnabled: true
+        serviceAccountsEnabled: true
+        frontchannelLogout: false
+        protocol: openid-connect
+    roles:
+      realm:
+        - name: user
+          description: "Default user role"
+        - name: admin
+          description: "Administrator role"
+{% if ocp4_workload_authentication_keycloak_num_users > 0 or ocp4_workload_authentication_keycloak_admin_create %}
+    users:
+{% for i in range(1, ocp4_workload_authentication_keycloak_num_users + 1) %}
+      - username: {{ ocp4_workload_authentication_keycloak_user_username_base }}{{ i }}
+        enabled: true
+        emailVerified: true
+        email: {{ ocp4_workload_authentication_keycloak_user_username_base }}{{ i }}@demo.redhat.com
+        firstName: {{ ocp4_workload_authentication_keycloak_user_username_base | capitalize }}{{ i }}
+        lastName: Demo
+        credentials:
+          - type: password
+            value: {{ _ocp4_workload_authentication_keycloak_user_password }}
+            temporary: false
+        realmRoles:
+          - user
+{% endfor %}
+{% if ocp4_workload_authentication_keycloak_admin_create %}
+      - username: {{ ocp4_workload_authentication_keycloak_admin_username }}
+        enabled: true
+        emailVerified: true
+        email: {{ ocp4_workload_authentication_keycloak_admin_username }}@demo.redhat.com
+        firstName: {{ ocp4_workload_authentication_keycloak_admin_username | capitalize }}
+        lastName: Demo
+        credentials:
+          - type: password
+            value: {{ _ocp4_workload_authentication_keycloak_admin_password }}
+            temporary: false
+        realmRoles:
+          - admin
+{% endif %}
+{% else %}
+    users: []
+{% endif %}
+    groups:
+      - name: admins
+      - name: users
+

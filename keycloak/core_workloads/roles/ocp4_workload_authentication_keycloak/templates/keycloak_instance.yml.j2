@@ -1,0 +1,30 @@
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: Keycloak
+metadata:
+  name: keycloak
+spec:
+  additionalOptions:
+    - name: enable-recovery
+      value: 'true'
+  db:
+    database: keycloak
+    host: keycloak-pgsql
+    passwordSecret:
+      key: password
+      name: keycloak-pgsql-user
+    usernameSecret:
+      key: user
+      name: keycloak-pgsql-user
+    vendor: postgres
+  hostname:
+    hostname: sso.{{ openshift_cluster_ingress_domain }}
+    strict: false
+    strictBackchannel: false
+  http:
+    httpEnabled: false
+    tlsSecret: keycloak-tls
+  ingress:
+    enabled: false
+  instances: 1
+  transaction:
+    xaEnabled: true

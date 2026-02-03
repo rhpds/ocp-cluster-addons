@@ -1,0 +1,7 @@
+---
+- name: Remove Keycloak Namespace
+  kubernetes.core.k8s:
+    state: absent
+    api_version: v1
+    kind: Namespace
+    name: "{{ ocp4_workload_authentication_keycloak_namespace }}"

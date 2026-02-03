@@ -1,0 +1,46 @@
+---
+# --------------------------------
+# Keycloak Operator
+# --------------------------------
+
+ocp4_workload_authentication_keycloak_namespace: keycloak
+
+ocp4_workload_authentication_keycloak_pgsql_user: keycloak
+
+ocp4_workload_authentication_keycloak_pgsql_password: "{{ lookup('password', '/dev/null chars=ascii_letters,digits '~ 'length=' ~ 10) }}"
+
+ocp4_workload_authentication_keycloak_channel: stable-v26.2
+
+ocp4_workload_authentication_keycloak_automatic_install_plan_approval: true
+
+ocp4_workload_authentication_keycloak_starting_csv: ""
+
+ocp4_workload_authentication_keycloak_use_catalog_source: false
+
+ocp4_workload_authentication_keycloak_catalogsource_image: quay.io/gpte-devops-automation/olm_snapshot_redhat_catalog
+
+ocp4_workload_authentication_keycloak_catalogsource_tag: v4.20_2025_10_23
+
+ocp4_workload_authentication_keycloak_default_realm: sso
+
+ocp4_workload_authentication_keycloak_num_users: 1
+
+ocp4_workload_authentication_keycloak_admin_create: true
+
+ocp4_workload_authentication_keycloak_admin_username: admin
+
+ocp4_workload_authentication_keycloak_admin_password: ""
+
+ocp4_workload_authentication_keycloak_user_username_base: user
+
+ocp4_workload_authentication_keycloak_user_password: ""
+
+ocp4_workload_authentication_keycloak_openshift_client_secret: ""
+
+ocp4_workload_authentication_keycloak_openshift_client_id: idp-4-ocp
+
+ocp4_workload_authentication_keycloak_remove_kubeadmin: false
+
+ocp4_workload_authentication_keycloak_enable_user_info_messages: true
+
+ocp4_workload_authentication_keycloak_enable_user_info_data: "{{ ocp4_workload_authentication_keycloak_num_users | int > 1 }}"

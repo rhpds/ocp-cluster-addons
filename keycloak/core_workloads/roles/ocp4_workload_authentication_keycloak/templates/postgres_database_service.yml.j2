@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: keycloak-pgsql
+spec:
+  ports:
+    - name: data
+      protocol: TCP
+      port: 5432
+      targetPort: 5432
+  selector:
+    app: keycloak-pgsql
