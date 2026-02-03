@@ -14,10 +14,10 @@ spec:
   sources:
     - repoURL: https://github.com/YOUR-ORG/YOUR-REPO.git  # Update with your Git repository
       targetRevision: main
-      path: argocd/infra/apps
+      path: keycloak/infra/apps
     - repoURL: https://github.com/YOUR-ORG/YOUR-REPO.git  # Update with your Git repository
       targetRevision: main
-      path: argocd/tenant/apps
+      path: keycloak/tenant/apps
   destination:
     server: https://kubernetes.default.svc
     namespace: openshift-gitops

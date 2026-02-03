@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: https://github.com/rhpds/ocp-cluster-addons.git
     targetRevision: keycloak-wip
-    path: argocd/charts/keycloak-instance
+    path: keycloak/infra/charts/keycloak-instance
     helm:
       valueFiles:
         - values.yaml

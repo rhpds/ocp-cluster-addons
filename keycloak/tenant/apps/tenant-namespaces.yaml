@@ -14,7 +14,7 @@ spec:
   source:
     repoURL: https://github.com/YOUR-ORG/YOUR-REPO.git  # Update with your Git repository
     targetRevision: main
-    path: argocd/tenant/charts/tenant-namespaces
+    path: keycloak/tenant/charts/tenant-namespaces
     helm:
       valueFiles:
         - values.yaml

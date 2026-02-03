@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Configuration script for Keycloak ArgoCD deployment
+# Configuration script for Keycloak deployment
 # This script helps configure required values for the deployment
 
 set -e
@@ -11,7 +11,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}=== Keycloak ArgoCD Configuration Helper ===${NC}\n"
+echo -e "${GREEN}=== Keycloak Configuration Helper ===${NC}\n"
 
 # Function to prompt for input with default value
 prompt_with_default() {
@@ -412,7 +412,7 @@ else
     echo "   git add tenant/"
 fi
 
-echo "   git commit -m 'Configure Keycloak ArgoCD deployment'"
+echo "   git commit -m 'Configure Keycloak deployment'"
 echo "   git push"
 echo ""
 

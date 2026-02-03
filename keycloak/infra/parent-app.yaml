@@ -14,7 +14,7 @@ spec:
   source:
     repoURL: https://github.com/rhpds/ocp-cluster-addons.git
     targetRevision: keycloak-wip
-    path: argocd/infra/apps
+    path: keycloak/infra/apps
   destination:
     server: https://kubernetes.default.svc
     namespace: openshift-gitops
