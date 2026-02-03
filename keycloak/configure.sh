@@ -392,6 +392,10 @@ echo -e "${GREEN}Credentials saved to: $CREDS_FILE${NC}"
 echo -e "${RED}IMPORTANT: Keep this file secure and do not commit it to Git!${NC}\n"
 
 echo -e "${GREEN}Next steps:${NC}"
+echo ""
+echo -e "${YELLOW}IMPORTANT: Before deploying, grant ArgoCD permissions:${NC}"
+echo "   oc apply -f argocd-rbac.yaml"
+echo ""
 echo "1. Review the configuration in the chart values files:"
 
 if [ "$DEPLOY_INFRA" = "true" ]; then
@@ -405,11 +409,11 @@ echo ""
 echo "2. Commit and push changes to your Git repository:"
 
 if [ "$DEPLOY_INFRA" = "true" ] && [ "$DEPLOY_TENANT" = "true" ]; then
-    echo "   git add infra/ tenant/ platform-parent-app.yaml"
+    echo "   git add infra/ tenant/ platform-parent-app.yaml argocd-rbac.yaml"
 elif [ "$DEPLOY_INFRA" = "true" ]; then
-    echo "   git add infra/"
+    echo "   git add infra/ argocd-rbac.yaml"
 else
-    echo "   git add tenant/"
+    echo "   git add tenant/ argocd-rbac.yaml"
 fi
 
 echo "   git commit -m 'Configure Keycloak deployment'"
@@ -446,9 +450,11 @@ else
 fi
 
 echo ""
+echo "For detailed deployment instructions, see: ARGOCD-SETUP.md"
+echo ""
 if [ "$DEPLOY_INFRA" = "true" ]; then
-    echo "For more information, see infra/README.md"
+    echo "For infrastructure details, see: infra/README.md"
 fi
 if [ "$DEPLOY_TENANT" = "true" ]; then
-    echo "For tenant configuration, see tenant/README.md"
+    echo "For tenant configuration, see: tenant/README.md"
 fi
