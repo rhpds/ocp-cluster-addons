@@ -21,6 +21,9 @@ users:
       - charlie
       - diana
       - eric
+    # Append GUID to usernames (creates: alice-product-team-alpha, bob-product-team-alpha, etc.)
+    # Set to false for simple usernames (alice, bob, etc.)
+    appendGuid: true
 
   password: "ProductAlpha-2026!"
   emailDomain: alpha.product.example.com

@@ -28,13 +28,15 @@ users:
     startNumber: 1
 
   # EXPLICIT MODE: Provide specific usernames
-  # Final usernames will be {username}-{guid}
-  # Examples: john-abc123, jane-abc123, bob-abc123
+  # When appendGuid=true: {username}-{guid} (e.g., john-abc123)
+  # When appendGuid=false: {username} (e.g., john)
   explicit:
     usernames: []
       # - john
       # - jane
       # - bob
+    # Append tenant GUID to usernames (recommended for multi-tenancy)
+    appendGuid: true
 
   # IMPORTANT: Change this in production or use external secret management
   password: changeme123

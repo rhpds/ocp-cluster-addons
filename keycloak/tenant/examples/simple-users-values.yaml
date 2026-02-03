@@ -1,0 +1,57 @@
+---
+# Example: Simple Explicit Usernames (No GUID Suffix)
+# For single-tenant clusters or when GUID suffixes are not needed
+
+tenant:
+  guid: "default"
+
+# Keycloak configuration
+keycloak:
+  namespace: keycloak
+  realmName: sso
+
+# User configuration - Explicit named users WITHOUT GUID suffix
+users:
+  mode: explicit
+
+  explicit:
+    usernames:
+      - john.smith
+      - jane.doe
+      - admin.user
+      - developer1
+      - developer2
+    # Set appendGuid to false for simple usernames without GUID suffix
+    # This will create users as: john.smith, jane.doe, etc. (NOT john.smith-default)
+    appendGuid: false
+
+  password: "changeme123"
+  emailDomain: example.com
+  emailVerified: true
+  lastName: User
+
+  realmRoles:
+    - user
+
+# Namespace configuration
+namespaces:
+  mode: generate
+  generate:
+    count: 3
+    prefix: project
+
+# RBAC configuration
+rbac:
+  namespaceAdmin:
+    enabled: true
+    clusterRole: admin
+
+# Resource quotas
+resourceQuota:
+  enabled: true
+  limits:
+    cpu: "8"
+    memory: 16Gi
+  requests:
+    cpu: "4"
+    memory: 8Gi

@@ -48,7 +48,10 @@ spec:
 {{- else if eq .Values.users.mode "explicit" }}
 {{- if .Values.users.explicit.usernames }}
 {{- range $username := .Values.users.explicit.usernames }}
-{{- $fullUsername := printf "%s-%s" $username $.Values.tenant.guid }}
+{{- $fullUsername := $username }}
+{{- if $.Values.users.explicit.appendGuid }}
+{{- $fullUsername = printf "%s-%s" $username $.Values.tenant.guid }}
+{{- end }}
 ---
 apiVersion: k8s.keycloak.org/v2alpha1
 kind: KeycloakUser

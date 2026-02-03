@@ -27,8 +27,9 @@ Creates Keycloak users in the realm with GUID-based naming.
 
 **Features:**
 - Generate users from count (e.g., `user1-guid`, `user2-guid`)
-- Explicit user list (e.g., `john-guid`, `jane-guid`)
+- Explicit user list with optional GUID suffix (e.g., `john-guid` or `john`)
 - Configurable passwords, roles, and attributes
+- Control GUID suffix for explicit usernames via `appendGuid` option
 
 ### 2. tenant-namespaces
 Creates OpenShift/Kubernetes namespaces for tenants with resource quotas and limit ranges.
@@ -74,7 +75,7 @@ users:
 - `user3-team-a`
 
 ### Explicit Mode
-Provide specific usernames:
+Provide specific usernames with optional GUID suffix:
 
 ```yaml
 tenant:
@@ -87,12 +88,21 @@ users:
       - john
       - jane
       - bob
+    # Optional: Control GUID suffix
+    appendGuid: true  # Default: true
 ```
 
-**Creates:**
+**With `appendGuid: true` (default - recommended for multi-tenancy):**
 - `john-team-a`
 - `jane-team-a`
 - `bob-team-a`
+
+**With `appendGuid: false` (simple usernames):**
+- `john`
+- `jane`
+- `bob`
+
+> **Note:** Set `appendGuid: false` for single-tenant clusters or when GUID suffixes are not needed. This is useful for clusters where you want simple, readable usernames without tenant isolation.
 
 ## Quick Start
 
