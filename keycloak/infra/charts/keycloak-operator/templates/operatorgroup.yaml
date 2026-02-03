@@ -4,6 +4,8 @@ kind: OperatorGroup
 metadata:
   name: {{ .Values.namespace }}-operatorgroup
   namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   targetNamespaces:
     - {{ .Values.namespace }}

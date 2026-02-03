@@ -1,0 +1,155 @@
+{{- if .Values.operator.installPlanApprover.enabled }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.operator.name }}-installplan-approver
+  namespace: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: keycloak-operator
+    app.kubernetes.io/component: installplan-approver
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  backoffLimit: {{ .Values.operator.installPlanApprover.backoffLimit }}
+  activeDeadlineSeconds: {{ .Values.operator.installPlanApprover.timeout }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: keycloak-operator
+        app.kubernetes.io/component: installplan-approver
+    spec:
+      serviceAccountName: installplan-approver
+      restartPolicy: OnFailure
+      containers:
+        - name: approver
+          image: {{ .Values.operator.installPlanApprover.image }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              #!/bin/bash
+              set -e
+
+              NAMESPACE="{{ .Values.namespace }}"
+              SUBSCRIPTION="{{ .Values.operator.name }}"
+              STARTING_CSV="{{ .Values.operator.startingCSV }}"
+              ENFORCE_CSV_MATCH="{{ .Values.operator.installPlanApprover.enforceCSVMatch }}"
+              TIMEOUT={{ .Values.operator.installPlanApprover.timeout }}
+
+              echo "======================================"
+              echo "InstallPlan Approver for ${SUBSCRIPTION}"
+              echo "======================================"
+              echo "Namespace: ${NAMESPACE}"
+              echo "Subscription: ${SUBSCRIPTION}"
+              echo "Starting CSV: ${STARTING_CSV:-<latest>}"
+              echo "Enforce CSV Match: ${ENFORCE_CSV_MATCH}"
+              echo "Timeout: ${TIMEOUT}s"
+              echo ""
+
+              # Function to get InstallPlan from Subscription
+              get_installplan() {
+                oc get subscription "${SUBSCRIPTION}" -n "${NAMESPACE}" \
+                  -o jsonpath='{.status.installplan.name}' 2>/dev/null || echo ""
+              }
+
+              # Wait for Subscription to have an InstallPlan
+              echo "Waiting for Subscription to create InstallPlan..."
+              ELAPSED=0
+              INSTALLPLAN=""
+
+              while [ -z "${INSTALLPLAN}" ] && [ ${ELAPSED} -lt ${TIMEOUT} ]; do
+                INSTALLPLAN=$(get_installplan)
+
+                if [ -z "${INSTALLPLAN}" ]; then
+                  echo "  [${ELAPSED}s] Waiting for InstallPlan... (checking every 5s)"
+                  sleep 5
+                  ELAPSED=$((ELAPSED + 5))
+                else
+                  echo "  [${ELAPSED}s] Found InstallPlan: ${INSTALLPLAN}"
+                fi
+              done
+
+              if [ -z "${INSTALLPLAN}" ]; then
+                echo ""
+                echo "ERROR: Timeout waiting for InstallPlan after ${TIMEOUT}s"
+                echo ""
+                echo "Subscription status:"
+                oc get subscription "${SUBSCRIPTION}" -n "${NAMESPACE}" -o yaml
+                exit 1
+              fi
+
+              # Get InstallPlan details
+              echo ""
+              echo "Retrieving InstallPlan details..."
+              INSTALLPLAN_CSV=$(oc get installplan "${INSTALLPLAN}" -n "${NAMESPACE}" \
+                -o jsonpath='{.spec.clusterServiceVersionNames[0]}' 2>/dev/null || echo "")
+              INSTALLPLAN_APPROVED=$(oc get installplan "${INSTALLPLAN}" -n "${NAMESPACE}" \
+                -o jsonpath='{.spec.approved}' 2>/dev/null || echo "false")
+
+              echo "  InstallPlan Name: ${INSTALLPLAN}"
+              echo "  CSV to Install: ${INSTALLPLAN_CSV}"
+              echo "  Currently Approved: ${INSTALLPLAN_APPROVED}"
+
+              # Check if already approved
+              if [ "${INSTALLPLAN_APPROVED}" = "true" ]; then
+                echo ""
+                echo "InstallPlan is already approved. Nothing to do."
+                exit 0
+              fi
+
+              # Verify CSV if enforcing match
+              if [ "${ENFORCE_CSV_MATCH}" = "true" ] && [ -n "${STARTING_CSV}" ]; then
+                echo ""
+                echo "Verifying CSV matches starting CSV..."
+
+                if [ "${INSTALLPLAN_CSV}" != "${STARTING_CSV}" ]; then
+                  echo ""
+                  echo "ERROR: CSV mismatch!"
+                  echo "  Expected: ${STARTING_CSV}"
+                  echo "  Found: ${INSTALLPLAN_CSV}"
+                  echo ""
+                  echo "The InstallPlan CSV does not match the specified startingCSV."
+                  echo "This could indicate:"
+                  echo "  1. The startingCSV is not available in the channel"
+                  echo "  2. The catalog has been updated"
+                  echo "  3. A misconfiguration in the subscription"
+                  echo ""
+                  echo "Full InstallPlan:"
+                  oc get installplan "${INSTALLPLAN}" -n "${NAMESPACE}" -o yaml
+                  exit 1
+                fi
+
+                echo "  ✓ CSV matches: ${INSTALLPLAN_CSV}"
+              fi
+
+              # Approve the InstallPlan
+              echo ""
+              echo "Approving InstallPlan..."
+              oc patch installplan "${INSTALLPLAN}" -n "${NAMESPACE}" \
+                --type merge \
+                --patch '{"spec":{"approved":true}}'
+
+              # Verify approval
+              APPROVED=$(oc get installplan "${INSTALLPLAN}" -n "${NAMESPACE}" \
+                -o jsonpath='{.spec.approved}')
+
+              if [ "${APPROVED}" = "true" ]; then
+                echo ""
+                echo "======================================"
+                echo "✓ InstallPlan approved successfully!"
+                echo "======================================"
+                echo "  InstallPlan: ${INSTALLPLAN}"
+                echo "  CSV: ${INSTALLPLAN_CSV}"
+                echo ""
+                echo "The operator installation will now proceed."
+                exit 0
+              else
+                echo ""
+                echo "ERROR: Failed to approve InstallPlan"
+                oc get installplan "${INSTALLPLAN}" -n "${NAMESPACE}" -o yaml
+                exit 1
+              fi
+{{- end }}

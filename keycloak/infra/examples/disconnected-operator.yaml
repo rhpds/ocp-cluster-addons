@@ -1,0 +1,56 @@
+---
+# Example: Keycloak Operator for Disconnected/Air-Gapped Environments
+# This configuration uses a custom catalog source and pins to a specific CSV version.
+
+# Override values for infra/charts/keycloak-operator
+
+namespace: keycloak
+
+operator:
+  name: rhbk-operator
+
+  # Operator channel
+  channel: stable-v26.2
+
+  # Manual approval for controlled upgrades
+  installPlanApproval: Manual
+
+  # Pin to specific CSV version available in custom catalog
+  startingCSV: "rhbk-operator.v26.2.0"
+
+  # InstallPlan Approver
+  installPlanApprover:
+    enabled: true
+    enforceCSVMatch: true
+    timeout: 600
+    backoffLimit: 3
+    # Use internal registry image
+    image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+
+  # Custom Catalog Source - Required for disconnected environments
+  catalogSource:
+    enabled: true
+    name: custom-redhat-catalog
+
+    # Custom catalog image from mirror registry
+    # Replace with your mirrored catalog image
+    image: quay.io/gpte-devops-automation/olm_snapshot_redhat_catalog
+    tag: v4.20_2025_10_23
+
+# How to use in disconnected environments:
+#
+# 1. Mirror the operator catalog to your registry:
+#    oc adm catalog mirror \
+#      registry.redhat.io/redhat/redhat-operator-index:v4.20 \
+#      your-mirror-registry.example.com:5000
+#
+# 2. Update catalogSource.image and catalogSource.tag above
+#    to point to your mirrored catalog
+#
+# 3. Deploy:
+#    helm upgrade --install keycloak-operator \
+#      infra/charts/keycloak-operator \
+#      -f infra/examples/disconnected-operator.yaml
+#
+# 4. The operator and its dependencies will be installed from
+#    the custom catalog source

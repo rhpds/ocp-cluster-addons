@@ -1,0 +1,32 @@
+{{- if .Values.operator.installPlanApprover.enabled }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: installplan-approver
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  labels:
+    app.kubernetes.io/name: keycloak-operator
+    app.kubernetes.io/component: installplan-approver
+rules:
+  - apiGroups:
+      - operators.coreos.com
+    resources:
+      - subscriptions
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - operators.coreos.com
+    resources:
+      - installplans
+    verbs:
+      - get
+      - list
+      - watch
+      - patch
+      - update
+{{- end }}

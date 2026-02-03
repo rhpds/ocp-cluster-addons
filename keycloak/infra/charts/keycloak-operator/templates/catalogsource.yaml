@@ -5,6 +5,8 @@ kind: CatalogSource
 metadata:
   name: {{ .Values.operator.catalogSource.name }}
   namespace: openshift-marketplace
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   sourceType: grpc
   image: {{ .Values.operator.catalogSource.image }}:{{ .Values.operator.catalogSource.tag }}

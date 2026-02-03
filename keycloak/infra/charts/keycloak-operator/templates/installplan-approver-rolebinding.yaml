@@ -1,0 +1,21 @@
+{{- if .Values.operator.installPlanApprover.enabled }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: installplan-approver
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  labels:
+    app.kubernetes.io/name: keycloak-operator
+    app.kubernetes.io/component: installplan-approver
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: installplan-approver
+subjects:
+  - kind: ServiceAccount
+    name: installplan-approver
+    namespace: {{ .Values.namespace }}
+{{- end }}

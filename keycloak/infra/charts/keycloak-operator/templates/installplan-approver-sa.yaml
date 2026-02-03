@@ -1,0 +1,13 @@
+{{- if .Values.operator.installPlanApprover.enabled }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: installplan-approver
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  labels:
+    app.kubernetes.io/name: keycloak-operator
+    app.kubernetes.io/component: installplan-approver
+{{- end }}
