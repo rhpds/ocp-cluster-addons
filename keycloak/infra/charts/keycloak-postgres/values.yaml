@@ -8,7 +8,7 @@ postgresql:
     name: keycloak
     user: keycloak
     # IMPORTANT: Change these in production or use external secret management
-    password: changeme123
+    password: openshift3
 
   resources:
     limits:

@@ -9,8 +9,8 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/YOUR-ORG/YOUR-REPO.git  # Update with your Git repository
-    targetRevision: main
+    repoURL: https://github.com/rhpds/ocp-cluster-addons.git
+    targetRevision: keycloak-wip
     path: argocd/charts/keycloak-instance
     helm:
       valueFiles:

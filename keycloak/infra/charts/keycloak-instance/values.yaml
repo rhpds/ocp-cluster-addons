@@ -4,7 +4,7 @@ namespace: keycloak
 keycloak:
   # REQUIRED: Update this with your OpenShift cluster's ingress domain
   # Example: apps.cluster-abc123.abc123.sandbox1234.opentlc.com
-  ingressDomain: apps.example.com
+  ingressDomain: apps.cluster-csssk.dynamic.redhatworkshops.io
 
   hostname: sso
 

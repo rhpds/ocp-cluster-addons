@@ -13,7 +13,7 @@ realm:
   client:
     id: idp-4-ocp
     # IMPORTANT: Change this in production or use external secret management
-    secret: changeme123
+    secret: wnCl1Pp18LpZDpJn
     enabled: true
     publicClient: false
     standardFlowEnabled: true
