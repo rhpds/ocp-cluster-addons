@@ -91,6 +91,15 @@ rules:
       - patch
       - delete
 
+  # Route custom host (required to set spec.host on Routes)
+  - apiGroups:
+      - route.openshift.io
+    resources:
+      - routes/custom-host
+    verbs:
+      - create
+      - update
+
   # Networking
   - apiGroups:
       - networking.k8s.io
