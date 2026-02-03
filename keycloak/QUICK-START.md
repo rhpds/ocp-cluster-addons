@@ -7,6 +7,7 @@ If you're seeing errors like:
 deployments.apps is forbidden: User "system:serviceaccount:openshift-gitops:..." cannot create resource
 secrets is forbidden: User "system:serviceaccount:openshift-gitops:..." cannot create resource
 services is forbidden: User "system:serviceaccount:openshift-gitops:..." cannot create resource
+Route.route.openshift.io "keycloak" is invalid: spec.host: Forbidden: you do not have permission to set the host field
 ```
 
 **Apply the RBAC configuration:**
@@ -22,7 +23,8 @@ This grants ArgoCD permissions to manage all Keycloak resources including:
 - ✅ ConfigMaps
 - ✅ Keycloak CRDs
 - ✅ Operators (OLM)
-- ✅ Routes
+- ✅ Routes (including custom hostnames)
+- ✅ Batch Jobs
 - ✅ And more...
 
 ## Verify RBAC Applied
