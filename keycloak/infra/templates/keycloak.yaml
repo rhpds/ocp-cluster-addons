@@ -4,6 +4,9 @@ kind: Keycloak
 metadata:
   name: keycloak
   namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   additionalOptions:
     {{- toYaml .Values.keycloak.additionalOptions | nindent 4 }}

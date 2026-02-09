@@ -9,6 +9,8 @@ kind: KeycloakUser
 metadata:
   name: {{ $username }}
   namespace: {{ $.Values.keycloak.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   labels:
     app.kubernetes.io/name: keycloak-users
     app.kubernetes.io/component: tenant

@@ -4,6 +4,9 @@ kind: KeycloakRealmImport
 metadata:
   name: {{ .Values.realm.name }}
   namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   labels:
     app.kubernetes.io/name: keycloak-realm
     app.kubernetes.io/component: infrastructure
