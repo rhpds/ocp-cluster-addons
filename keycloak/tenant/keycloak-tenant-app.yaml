@@ -16,7 +16,7 @@ spec:
     helm:
       values: |
         deployer:
-          guid: default
+          guid: xyzzy
         keycloak:
           namespace: keycloak
           realmName: sso
@@ -26,7 +26,7 @@ spec:
             count: 5
             prefix: user
             startNumber: 1
-          password: changeme123
+          password: openshift
         namespaces:
           mode: generate
           generate:
