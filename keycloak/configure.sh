@@ -262,7 +262,6 @@ spec:
           name: sso
           client:
             id: idp-4-ocp
-            secret: ${OAUTH_SECRET}
           admin:
             enabled: ${ADMIN_ENABLED}
             username: ${ADMIN_USER}
@@ -270,7 +269,6 @@ spec:
         oauth:
           client:
             id: idp-4-ocp
-            secret: ${OAUTH_SECRET}
           keycloak:
             hostname: sso
             realmName: sso
@@ -289,6 +287,7 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - SkipDryRunOnMissingResource=true
 INFRA_EOF
 fi
 
@@ -351,6 +350,7 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - SkipDryRunOnMissingResource=true
 TENANT_EOF
 fi
 
@@ -439,23 +439,19 @@ if [ "$DEPLOY_INFRA" = "true" ] && [ "$DEPLOY_TENANT" = "true" ]; then
 elif [ "$DEPLOY_INFRA" = "true" ]; then
     echo "3. Deploy the infrastructure:"
     echo "   oc apply -f infra/keycloak-infra-app.yaml"
-    echo ""
-    echo "   This will deploy:"
-    echo "   - Keycloak operator"
-    echo "   - PostgreSQL database"
-    echo "   - Keycloak instance"
-    echo "   - Keycloak realm configuration"
-    echo "   - OpenShift OAuth integration"
 else
     echo "3. Deploy the tenant resources:"
     echo "   oc apply -f tenant/keycloak-tenant-app.yaml"
     echo ""
-    echo "   This will deploy:"
-    echo "   - Keycloak users"
-    echo "   - Namespaces for users"
-    echo "   - RBAC bindings"
-    echo ""
     echo "   NOTE: Make sure Keycloak infrastructure is already deployed!"
+fi
+
+if [ "$DEPLOY_INFRA" = "true" ]; then
+    echo ""
+    echo "4. Set the SSO client secret (not stored in git):"
+    echo "   argocd app set keycloak-infra \\"
+    echo "     -p realm.client.secret=${OAUTH_SECRET} \\"
+    echo "     -p oauth.client.secret=${OAUTH_SECRET}"
 fi
 
 echo ""

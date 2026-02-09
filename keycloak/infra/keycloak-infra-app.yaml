@@ -39,7 +39,6 @@ spec:
           name: sso
           client:
             id: idp-4-ocp
-            secret: oXr9i5JGJmAofpQf
           admin:
             enabled: true
             username: admin
@@ -47,7 +46,6 @@ spec:
         oauth:
           client:
             id: idp-4-ocp
-            secret: oXr9i5JGJmAofpQf
           keycloak:
             hostname: sso
             realmName: sso
@@ -66,3 +64,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - SkipDryRunOnMissingResource=true
