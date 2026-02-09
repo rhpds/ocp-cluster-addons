@@ -4,8 +4,6 @@ kind: Application
 metadata:
   name: tenant-namespaces
   namespace: openshift-gitops
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
   labels:
     app.kubernetes.io/part-of: keycloak-platform
     component: tenant
@@ -16,8 +14,22 @@ spec:
     targetRevision: keycloak-wip
     path: keycloak/tenant/charts/tenant-namespaces
     helm:
-      valueFiles:
-        - values.yaml
+      values: |
+        deployer:
+          guid: default
+        namespaces:
+          mode: generate
+          generate:
+            count: 5
+            prefix: user
+            suffix: -project
+            startNumber: 1
+        resourceQuota:
+          enabled: true
+        limitRange:
+          enabled: true
+        networkPolicy:
+          enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: default

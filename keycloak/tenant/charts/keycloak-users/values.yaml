@@ -1,8 +1,8 @@
 ---
-# Tenant identifier - REQUIRED
-# This GUID uniquely identifies this tenant and is used to namespace resources
-# Example: "dev-team-a" or "project-12345" or a UUID
-tenant:
+# Deployer-injected values (set by bootstrap app / ArgoCD parameters)
+deployer:
+  domain: apps.example.com
+  apiUrl: ""
   guid: "default"
 
 # Keycloak configuration
@@ -65,4 +65,4 @@ users:
 attributes: {}
   # department: engineering
   # cost_center: "12345"
-  # tenant_id: "{{ .Values.tenant.guid }}"
+  # tenant_id: "{{ .Values.deployer.guid }}"

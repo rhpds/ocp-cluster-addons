@@ -2,7 +2,7 @@
 {{- if gt (.Values.users.generate.count | int) 0 }}
 {{- range $i := until (.Values.users.generate.count | int) }}
 {{- $userNum := add ($.Values.users.generate.startNumber | int) $i }}
-{{- $username := printf "%s%d-%s" $.Values.users.generate.prefix $userNum $.Values.tenant.guid }}
+{{- $username := printf "%s%d-%s" $.Values.users.generate.prefix $userNum $.Values.deployer.guid }}
 ---
 apiVersion: k8s.keycloak.org/v2alpha1
 kind: KeycloakUser
@@ -12,8 +12,8 @@ metadata:
   labels:
     app.kubernetes.io/name: keycloak-users
     app.kubernetes.io/component: tenant
-    app.kubernetes.io/instance: {{ $.Values.tenant.guid }}
-    tenant-guid: {{ $.Values.tenant.guid | quote }}
+    app.kubernetes.io/instance: {{ $.Values.deployer.guid }}
+    tenant-guid: {{ $.Values.deployer.guid | quote }}
     tenant-user: "true"
 spec:
   realmName: {{ $.Values.keycloak.realmName }}
@@ -50,7 +50,7 @@ spec:
 {{- range $username := .Values.users.explicit.usernames }}
 {{- $fullUsername := $username }}
 {{- if $.Values.users.explicit.appendGuid }}
-{{- $fullUsername = printf "%s-%s" $username $.Values.tenant.guid }}
+{{- $fullUsername = printf "%s-%s" $username $.Values.deployer.guid }}
 {{- end }}
 ---
 apiVersion: k8s.keycloak.org/v2alpha1
@@ -61,8 +61,8 @@ metadata:
   labels:
     app.kubernetes.io/name: keycloak-users
     app.kubernetes.io/component: tenant
-    app.kubernetes.io/instance: {{ $.Values.tenant.guid }}
-    tenant-guid: {{ $.Values.tenant.guid | quote }}
+    app.kubernetes.io/instance: {{ $.Values.deployer.guid }}
+    tenant-guid: {{ $.Values.deployer.guid | quote }}
     tenant-user: "true"
 spec:
   realmName: {{ $.Values.keycloak.realmName }}

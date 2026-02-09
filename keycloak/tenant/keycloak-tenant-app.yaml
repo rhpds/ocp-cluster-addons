@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: keycloak-users
+  name: keycloak-tenants
   namespace: openshift-gitops
   labels:
     app.kubernetes.io/part-of: keycloak-platform
@@ -12,7 +12,7 @@ spec:
   source:
     repoURL: https://github.com/rhpds/ocp-cluster-addons.git
     targetRevision: keycloak-wip
-    path: keycloak/tenant/charts/keycloak-users
+    path: keycloak/tenant/apps
     helm:
       values: |
         deployer:
@@ -27,18 +27,29 @@ spec:
             prefix: user
             startNumber: 1
           password: changeme123
+        namespaces:
+          mode: generate
+          generate:
+            count: 5
+            prefix: user
+            suffix: -project
+            startNumber: 1
+        resourceQuota:
+          enabled: true
+        limitRange:
+          enabled: true
+        networkPolicy:
+          enabled: false
+        rbac:
+          namespaceAdmin:
+            enabled: true
+            clusterRole: admin
   destination:
     server: https://kubernetes.default.svc
-    namespace: keycloak
+    namespace: openshift-gitops
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=false
-    retry:
-      limit: 10
-      backoff:
-        duration: 10s
-        factor: 2
-        maxDuration: 5m
+      - CreateNamespace=true

@@ -2,7 +2,7 @@
 # Example: Workshop/Training Environment
 # GUID-based tenant with 50 students
 
-tenant:
+deployer:
   guid: "workshop-2026-01"
 
 # Keycloak configuration
@@ -58,8 +58,8 @@ resourceQuota:
   requests:
     cpu: "1"
     memory: 2Gi
+    storage: 20Gi
   persistentvolumeclaims: "3"
-  requests.storage: 20Gi
   pods: "10"
   services: "5"
   secrets: "15"
@@ -105,4 +105,4 @@ rbac:
 attributes:
   workshop: "OpenShift Advanced 2026"
   session: "january"
-  tenant_id: "{{ .Values.tenant.guid }}"
+  tenant_id: "{{ .Values.deployer.guid }}"

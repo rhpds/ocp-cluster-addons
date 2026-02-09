@@ -1,0 +1,68 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keycloak-infra
+  namespace: openshift-gitops
+  labels:
+    app.kubernetes.io/part-of: keycloak-platform
+    component: infrastructure
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/rhpds/ocp-cluster-addons.git
+    targetRevision: keycloak-wip
+    path: keycloak/infra/apps
+    helm:
+      values: |
+        namespace: keycloak
+        deployer:
+          domain: apps.cluster-lpx74.dyn.redhatworkshops.io
+        operator:
+          name: rhbk-operator
+          channel: stable-v26.2
+          installPlanApproval: Automatic
+          startingCSV: ""
+          installPlanApprover:
+            enabled: false
+        keycloak:
+          hostname: sso
+          instances: 1
+        postgresql:
+          database:
+            name: keycloak
+            user: keycloak
+            password: openshift
+          storage:
+            size: 50Gi
+        realm:
+          name: sso
+          client:
+            id: idp-4-ocp
+            secret: oXr9i5JGJmAofpQf
+          admin:
+            enabled: true
+            username: admin
+            password: openshift
+        oauth:
+          client:
+            id: idp-4-ocp
+            secret: oXr9i5JGJmAofpQf
+          keycloak:
+            hostname: sso
+            realmName: sso
+        rbac:
+          clusterAdmin:
+            enabled: true
+            username: admin
+          removeKubeadmin:
+            enabled: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openshift-gitops
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

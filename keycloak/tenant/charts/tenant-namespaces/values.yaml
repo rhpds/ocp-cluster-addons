@@ -1,8 +1,8 @@
 ---
-# Tenant identifier - REQUIRED
-# This GUID uniquely identifies this tenant and is used to namespace resources
-# Example: "dev-team-a" or "project-12345" or a UUID
-tenant:
+# Deployer-injected values (set by bootstrap app / ArgoCD parameters)
+deployer:
+  domain: apps.example.com
+  apiUrl: ""
   guid: "default"
 
 # Tenant namespace configuration
@@ -48,10 +48,10 @@ resourceQuota:
   requests:
     cpu: "2"
     memory: 4Gi
+    storage: 50Gi  # Changed from requests.storage to nested structure
 
   # Storage
   persistentvolumeclaims: "5"
-  requests.storage: 50Gi
 
   # Object counts
   pods: "10"

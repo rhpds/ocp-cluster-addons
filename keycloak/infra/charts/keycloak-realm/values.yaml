@@ -1,6 +1,12 @@
 ---
 namespace: keycloak
 
+# Deployer-injected values (set by bootstrap app / ArgoCD parameters)
+deployer:
+  domain: apps.example.com
+  apiUrl: ""
+  guid: ""
+
 realm:
   name: sso
   enabled: true
@@ -13,7 +19,7 @@ realm:
   client:
     id: idp-4-ocp
     # IMPORTANT: Change this in production or use external secret management
-    secret: wnCl1Pp18LpZDpJn
+    secret: changeme123
     enabled: true
     publicClient: false
     standardFlowEnabled: true

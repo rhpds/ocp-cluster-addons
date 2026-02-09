@@ -2,7 +2,7 @@
 # Example: Multi-Environment Tenant
 # GUID-based tenant with explicit environment namespaces
 
-tenant:
+deployer:
   guid: "product-team-alpha"
 
 # Keycloak configuration
@@ -65,8 +65,8 @@ resourceQuota:
   requests:
     cpu: "8"
     memory: 16Gi
+    storage: 500Gi
   persistentvolumeclaims: "20"
-  requests.storage: 500Gi
   pods: "50"
   services: "30"
   secrets: "50"
@@ -116,4 +116,4 @@ attributes:
   product: "alpha"
   department: "engineering"
   cost_center: "67890"
-  tenant_id: "{{ .Values.tenant.guid }}"
+  tenant_id: "{{ .Values.deployer.guid }}"

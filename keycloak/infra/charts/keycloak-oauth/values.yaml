@@ -1,9 +1,11 @@
 ---
-oauth:
-  # REQUIRED: Update this with your OpenShift cluster's ingress domain
-  # Example: apps.cluster-abc123.abc123.sandbox1234.opentlc.com
-  ingressDomain: apps.cluster-csssk.dynamic.redhatworkshops.io
+# Deployer-injected values (set by bootstrap app / ArgoCD parameters)
+deployer:
+  domain: apps.example.com
+  apiUrl: ""
+  guid: ""
 
+oauth:
   identityProvider:
     name: rhbk
     type: OpenID
@@ -12,7 +14,7 @@ oauth:
   client:
     id: idp-4-ocp
     # IMPORTANT: Must match the client secret in keycloak-realm chart
-    secret: wnCl1Pp18LpZDpJn
+    secret: changeme123
     secretName: openid-client-secret-bb6zw
 
   keycloak:

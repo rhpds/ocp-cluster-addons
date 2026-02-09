@@ -4,8 +4,6 @@ kind: Application
 metadata:
   name: keycloak-oauth
   namespace: openshift-gitops
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
@@ -13,14 +11,28 @@ spec:
     targetRevision: keycloak-wip
     path: keycloak/infra/charts/keycloak-oauth
     helm:
-      valueFiles:
-        - values.yaml
+      values: |
+        deployer:
+          domain: apps.cluster-lpx74.dyn.redhatworkshops.io
+        oauth:
+          client:
+            id: idp-4-ocp
+            secret: oXr9i5JGJmAofpQf
+          keycloak:
+            hostname: sso
+            realmName: sso
+        rbac:
+          clusterAdmin:
+            enabled: true
+            username: admin
+          removeKubeadmin:
+            enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: openshift-config
   syncPolicy:
     automated:
-      prune: false  # Don't auto-prune OAuth config
+      prune: false
       selfHeal: true
     syncOptions:
       - CreateNamespace=false

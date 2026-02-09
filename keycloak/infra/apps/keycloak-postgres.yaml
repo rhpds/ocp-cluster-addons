@@ -4,8 +4,6 @@ kind: Application
 metadata:
   name: keycloak-postgres
   namespace: openshift-gitops
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
@@ -13,8 +11,15 @@ spec:
     targetRevision: keycloak-wip
     path: keycloak/infra/charts/keycloak-postgres
     helm:
-      valueFiles:
-        - values.yaml
+      values: |
+        namespace: keycloak
+        postgresql:
+          database:
+            name: keycloak
+            user: keycloak
+            password: openshift
+          storage:
+            size: 50Gi
   destination:
     server: https://kubernetes.default.svc
     namespace: keycloak

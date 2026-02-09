@@ -4,8 +4,6 @@ kind: Application
 metadata:
   name: keycloak-instance
   namespace: openshift-gitops
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
@@ -13,8 +11,13 @@ spec:
     targetRevision: keycloak-wip
     path: keycloak/infra/charts/keycloak-instance
     helm:
-      valueFiles:
-        - values.yaml
+      values: |
+        namespace: keycloak
+        deployer:
+          domain: apps.cluster-lpx74.dyn.redhatworkshops.io
+        keycloak:
+          hostname: sso
+          instances: 1
   destination:
     server: https://kubernetes.default.svc
     namespace: keycloak

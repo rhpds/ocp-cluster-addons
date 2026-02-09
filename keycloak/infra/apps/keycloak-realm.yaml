@@ -4,8 +4,6 @@ kind: Application
 metadata:
   name: keycloak-realm
   namespace: openshift-gitops
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
@@ -13,8 +11,17 @@ spec:
     targetRevision: keycloak-wip
     path: keycloak/infra/charts/keycloak-realm
     helm:
-      valueFiles:
-        - values.yaml
+      values: |
+        namespace: keycloak
+        realm:
+          name: sso
+          client:
+            id: idp-4-ocp
+            secret: oXr9i5JGJmAofpQf
+          admin:
+            enabled: true
+            username: admin
+            password: openshift
   destination:
     server: https://kubernetes.default.svc
     namespace: keycloak

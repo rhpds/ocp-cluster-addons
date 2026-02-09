@@ -1,7 +1,8 @@
 ---
-# Tenant identifier - REQUIRED
-# Must match the GUID used in keycloak-users and tenant-namespaces charts
-tenant:
+# Deployer-injected values (set by bootstrap app / ArgoCD parameters)
+deployer:
+  domain: apps.example.com
+  apiUrl: ""
   guid: "default"
 
 # Tenant user configuration

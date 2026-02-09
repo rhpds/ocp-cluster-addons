@@ -55,14 +55,14 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/YOUR-ORG/YOUR-REPO.git
+        repoURL: https://github.com/rhpds/ocp-cluster-addons.git
         targetRevision: main
-        path: argocd/tenant/charts/{{chart}}
+        path: keycloak/tenant/charts/{{chart}}
         helm:
           valueFiles:
             - values.yaml
           values: |
-            tenant:
+            deployer:
               guid: "{{guid}}"
 
             keycloak:
@@ -102,8 +102,8 @@ spec:
               requests:
                 cpu: "2"
                 memory: 4Gi
+                storage: 50Gi
               persistentvolumeclaims: "5"
-              requests.storage: 50Gi
               pods: "10"
               services: "10"
               secrets: "20"

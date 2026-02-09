@@ -22,4 +22,4 @@ spec:
       extraScopes:
         {{- toYaml .Values.oauth.extraScopes | nindent 8 }}
       issuer: >-
-        https://{{ .Values.oauth.keycloak.hostname }}.{{ .Values.oauth.ingressDomain }}/realms/{{ .Values.oauth.keycloak.realmName }}
+        https://{{ .Values.oauth.keycloak.hostname }}.{{ .Values.deployer.domain }}/realms/{{ .Values.oauth.keycloak.realmName }}

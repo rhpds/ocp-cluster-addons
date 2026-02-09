@@ -1,6 +1,12 @@
 ---
 namespace: keycloak
 
+# Deployer-injected values (set by bootstrap app / ArgoCD parameters)
+deployer:
+  domain: apps.example.com
+  apiUrl: ""
+  guid: ""
+
 operator:
   name: rhbk-operator
   channel: stable-v26.2

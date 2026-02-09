@@ -6,7 +6,7 @@ metadata:
   name: keycloak
   namespace: {{ .Values.namespace }}
 spec:
-  host: {{ .Values.keycloak.hostname }}.{{ .Values.keycloak.ingressDomain }}
+  host: {{ .Values.keycloak.hostname }}.{{ .Values.deployer.domain }}
   to:
     kind: Service
     name: keycloak

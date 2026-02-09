@@ -2,7 +2,7 @@
 {{- if eq .Values.namespaces.mode "generate" }}
 {{- range $i := until (.Values.namespaces.generate.count | int) }}
 {{- $num := add ($.Values.namespaces.generate.startNumber | int) $i }}
-{{- $nsName := printf "%s%d-%s%s" $.Values.namespaces.generate.prefix $num $.Values.tenant.guid $.Values.namespaces.generate.suffix }}
+{{- $nsName := printf "%s%d-%s%s" $.Values.namespaces.generate.prefix $num $.Values.deployer.guid $.Values.namespaces.generate.suffix }}
 ---
 apiVersion: v1
 kind: LimitRange
@@ -12,8 +12,8 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: argocd
     app.kubernetes.io/component: tenant
-    app.kubernetes.io/instance: {{ $.Values.tenant.guid }}
-    tenant-guid: {{ $.Values.tenant.guid | quote }}
+    app.kubernetes.io/instance: {{ $.Values.deployer.guid }}
+    tenant-guid: {{ $.Values.deployer.guid | quote }}
 spec:
   limits:
     - type: Container
@@ -32,7 +32,7 @@ spec:
 {{- end }}
 {{- else if eq .Values.namespaces.mode "explicit" }}
 {{- range $name := .Values.namespaces.explicit.names }}
-{{- $nsName := printf "%s-%s" $name $.Values.tenant.guid }}
+{{- $nsName := printf "%s-%s" $name $.Values.deployer.guid }}
 ---
 apiVersion: v1
 kind: LimitRange
@@ -42,8 +42,8 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: argocd
     app.kubernetes.io/component: tenant
-    app.kubernetes.io/instance: {{ $.Values.tenant.guid }}
-    tenant-guid: {{ $.Values.tenant.guid | quote }}
+    app.kubernetes.io/instance: {{ $.Values.deployer.guid }}
+    tenant-guid: {{ $.Values.deployer.guid | quote }}
 spec:
   limits:
     - type: Container

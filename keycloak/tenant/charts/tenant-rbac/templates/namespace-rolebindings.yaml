@@ -2,9 +2,9 @@
 {{- if eq .Values.users.mode "generate" }}
 {{- range $i := until (.Values.users.generate.count | int) }}
 {{- $userNum := add ($.Values.users.generate.startNumber | int) $i }}
-{{- $username := printf "%s%d-%s" $.Values.users.generate.prefix $userNum $.Values.tenant.guid }}
+{{- $username := printf "%s%d-%s" $.Values.users.generate.prefix $userNum $.Values.deployer.guid }}
 {{- $nsNum := add ($.Values.namespaces.generate.startNumber | int) $i }}
-{{- $nsName := printf "%s%d-%s%s" $.Values.namespaces.generate.prefix $nsNum $.Values.tenant.guid $.Values.namespaces.generate.suffix }}
+{{- $nsName := printf "%s%d-%s%s" $.Values.namespaces.generate.prefix $nsNum $.Values.deployer.guid $.Values.namespaces.generate.suffix }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -14,8 +14,8 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: argocd
     app.kubernetes.io/component: tenant
-    app.kubernetes.io/instance: {{ $.Values.tenant.guid }}
-    tenant-guid: {{ $.Values.tenant.guid | quote }}
+    app.kubernetes.io/instance: {{ $.Values.deployer.guid }}
+    tenant-guid: {{ $.Values.deployer.guid | quote }}
     tenant-user: {{ $username | quote }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -28,13 +28,13 @@ subjects:
 {{- end }}
 {{- else if eq .Values.users.mode "explicit" }}
 {{- range $idx, $username := .Values.users.explicit.usernames }}
-{{- $fullUsername := printf "%s-%s" $username $.Values.tenant.guid }}
+{{- $fullUsername := printf "%s-%s" $username $.Values.deployer.guid }}
 {{- $nsName := "" }}
 {{- if eq $.Values.namespaces.mode "explicit" }}
-{{- $nsName = printf "%s-%s" (index $.Values.namespaces.explicit.names $idx) $.Values.tenant.guid }}
+{{- $nsName = printf "%s-%s" (index $.Values.namespaces.explicit.names $idx) $.Values.deployer.guid }}
 {{- else }}
 {{- $nsNum := add ($.Values.namespaces.generate.startNumber | int) $idx }}
-{{- $nsName = printf "%s%d-%s%s" $.Values.namespaces.generate.prefix $nsNum $.Values.tenant.guid $.Values.namespaces.generate.suffix }}
+{{- $nsName = printf "%s%d-%s%s" $.Values.namespaces.generate.prefix $nsNum $.Values.deployer.guid $.Values.namespaces.generate.suffix }}
 {{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -45,8 +45,8 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: argocd
     app.kubernetes.io/component: tenant
-    app.kubernetes.io/instance: {{ $.Values.tenant.guid }}
-    tenant-guid: {{ $.Values.tenant.guid | quote }}
+    app.kubernetes.io/instance: {{ $.Values.deployer.guid }}
+    tenant-guid: {{ $.Values.deployer.guid | quote }}
     tenant-user: {{ $fullUsername | quote }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io

@@ -1,6 +1,12 @@
 ---
 namespace: keycloak
 
+# Deployer-injected values (set by bootstrap app / ArgoCD parameters)
+deployer:
+  domain: apps.example.com
+  apiUrl: ""
+  guid: ""
+
 postgresql:
   image: registry.redhat.io/rhel9/postgresql-16:1-1754433677
 
@@ -8,7 +14,7 @@ postgresql:
     name: keycloak
     user: keycloak
     # IMPORTANT: Change these in production or use external secret management
-    password: openshift3
+    password: changeme123
 
   resources:
     limits:

@@ -1,11 +1,13 @@
 ---
 namespace: keycloak
 
-keycloak:
-  # REQUIRED: Update this with your OpenShift cluster's ingress domain
-  # Example: apps.cluster-abc123.abc123.sandbox1234.opentlc.com
-  ingressDomain: apps.cluster-csssk.dynamic.redhatworkshops.io
+# Deployer-injected values (set by bootstrap app / ArgoCD parameters)
+deployer:
+  domain: apps.example.com
+  apiUrl: ""
+  guid: ""
 
+keycloak:
   hostname: sso
 
   instances: 1

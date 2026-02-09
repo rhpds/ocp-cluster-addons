@@ -64,7 +64,7 @@ esac
 
 # Get Git repository URL
 echo -e "\n${GREEN}2. Git Repository Configuration${NC}"
-prompt_with_default "Enter your Git repository URL" "https://github.com/YOUR-ORG/YOUR-REPO.git" GIT_REPO
+prompt_with_default "Enter your Git repository URL" "https://github.com/rhpds/ocp-cluster-addons.git" GIT_REPO
 prompt_with_default "Enter the Git branch/tag" "main" GIT_BRANCH
 
 # Get OpenShift ingress domain
@@ -137,9 +137,10 @@ if [ "$DEPLOY_INFRA" = "true" ] || [ "$DEPLOY_TENANT" = "true" ]; then
     SECTION_NUM=$((SECTION_NUM + 1))
 fi
 
-# User configuration (only for tenant deployments)
+# Tenant configuration (only for tenant deployments)
 if [ "$DEPLOY_TENANT" = "true" ]; then
-    echo -e "\n${GREEN}${SECTION_NUM}. User Configuration${NC}"
+    echo -e "\n${GREEN}${SECTION_NUM}. Tenant Configuration${NC}"
+    prompt_with_default "Tenant GUID (unique identifier for this tenant)" "default" TENANT_GUID
     prompt_with_default "Number of regular users to create" "5" NUM_USERS
     prompt_with_default "Username base for regular users" "user" USER_BASE
     SECTION_NUM=$((SECTION_NUM + 1))
@@ -198,6 +199,7 @@ if [ "$DEPLOY_INFRA" = "true" ]; then
 fi
 
 if [ "$DEPLOY_TENANT" = "true" ]; then
+    echo "Tenant GUID: $TENANT_GUID"
     echo "Regular Users: ${USER_BASE}1..${USER_BASE}${NUM_USERS}"
     echo "Users Password: ${USER_PASSWORD:0:4}****"
 fi
@@ -214,137 +216,305 @@ fi
 # Apply configuration
 echo -e "\n${GREEN}Applying configuration...${NC}"
 
-# Update Git repository URLs in app manifests
+# Helper function: update repoURL and targetRevision in an ArgoCD manifest
+# Usage: set_git_source <file> <repo-url> <branch>
+set_git_source() {
+    local file="$1"
+    local repo="$2"
+    local branch="$3"
+
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "s|repoURL: .*|repoURL: $repo|g" "$file"
+        sed -i '' "s|targetRevision: .*|targetRevision: $branch|g" "$file"
+    else
+        sed -i "s|repoURL: .*|repoURL: $repo|g" "$file"
+        sed -i "s|targetRevision: .*|targetRevision: $branch|g" "$file"
+    fi
+}
+
+# Helper function: replace the helm.values block in an ArgoCD Application manifest
+# Usage: set_helm_values <file> <yaml-string>
+# The yaml-string should be the inline YAML content (without the "values: |" prefix)
+set_helm_values() {
+    local file="$1"
+    local values_content="$2"
+
+    # Build the indented values block (8 spaces for values: |, 10 spaces for content)
+    local values_block
+    values_block="      values: |"
+    while IFS= read -r line; do
+        values_block="${values_block}"$'\n'"        ${line}"
+    done <<< "$values_content"
+
+    # Use python to replace the values block (handles multiline reliably)
+    python3 -c "
+import re, sys
+with open('$file', 'r') as f:
+    content = f.read()
+# Match 'values: |' followed by indented lines (more indented than 'values:')
+content = re.sub(
+    r'      values: \|(\n        .*)*',
+    sys.stdin.read().rstrip(),
+    content,
+    count=1
+)
+with open('$file', 'w') as f:
+    f.write(content)
+" <<< "$values_block"
+}
+
+# Update Git source on all relevant app manifests
 if [ "$DEPLOY_INFRA" = "true" ]; then
     echo "Updating infrastructure app manifests..."
     for app_file in infra/apps/*.yaml; do
-        if [ -f "$app_file" ]; then
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-                sed -i '' "s|repoURL: .*|repoURL: $GIT_REPO|g" "$app_file"
-                sed -i '' "s|targetRevision: .*|targetRevision: $GIT_BRANCH|g" "$app_file"
-            else
-                sed -i "s|repoURL: .*|repoURL: $GIT_REPO|g" "$app_file"
-                sed -i "s|targetRevision: .*|targetRevision: $GIT_BRANCH|g" "$app_file"
-            fi
-        fi
+        [ -f "$app_file" ] && set_git_source "$app_file" "$GIT_REPO" "$GIT_BRANCH"
     done
+
+    # Write keycloak-infra-app.yaml (app-of-apps)
+    cat > "infra/keycloak-infra-app.yaml" <<INFRA_EOF
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keycloak-infra
+  namespace: openshift-gitops
+  labels:
+    app.kubernetes.io/part-of: keycloak-platform
+    component: infrastructure
+spec:
+  project: default
+  source:
+    repoURL: ${GIT_REPO}
+    targetRevision: ${GIT_BRANCH}
+    path: keycloak/infra/apps
+    helm:
+      values: |
+        namespace: keycloak
+        deployer:
+          domain: ${INGRESS_DOMAIN}
+        operator:
+          name: rhbk-operator
+          channel: stable-v26.2
+          installPlanApproval: Automatic
+          startingCSV: ""
+          installPlanApprover:
+            enabled: false
+        keycloak:
+          hostname: sso
+          instances: 1
+        postgresql:
+          database:
+            name: keycloak
+            user: keycloak
+            password: ${PG_PASSWORD}
+          storage:
+            size: 50Gi
+        realm:
+          name: sso
+          client:
+            id: idp-4-ocp
+            secret: ${OAUTH_SECRET}
+          admin:
+            enabled: ${ADMIN_ENABLED}
+            username: ${ADMIN_USER}
+            password: ${ADMIN_PASSWORD}
+        oauth:
+          client:
+            id: idp-4-ocp
+            secret: ${OAUTH_SECRET}
+          keycloak:
+            hostname: sso
+            realmName: sso
+        rbac:
+          clusterAdmin:
+            enabled: ${ADMIN_ENABLED}
+            username: ${ADMIN_USER}
+          removeKubeadmin:
+            enabled: ${REMOVE_KUBEADMIN_ENABLED}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openshift-gitops
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+INFRA_EOF
 fi
 
 if [ "$DEPLOY_TENANT" = "true" ]; then
     echo "Updating tenant app manifests..."
     for app_file in tenant/apps/*.yaml; do
-        if [ -f "$app_file" ]; then
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-                sed -i '' "s|repoURL: .*|repoURL: $GIT_REPO|g" "$app_file"
-                sed -i '' "s|targetRevision: .*|targetRevision: $GIT_BRANCH|g" "$app_file"
-            else
-                sed -i "s|repoURL: .*|repoURL: $GIT_REPO|g" "$app_file"
-                sed -i "s|targetRevision: .*|targetRevision: $GIT_BRANCH|g" "$app_file"
-            fi
-        fi
+        [ -f "$app_file" ] && set_git_source "$app_file" "$GIT_REPO" "$GIT_BRANCH"
     done
+
+    # Write keycloak-tenant-app.yaml (app-of-apps)
+    cat > "tenant/keycloak-tenant-app.yaml" <<TENANT_EOF
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keycloak-tenants
+  namespace: openshift-gitops
+  labels:
+    app.kubernetes.io/part-of: keycloak-platform
+    component: tenant
+spec:
+  project: default
+  source:
+    repoURL: ${GIT_REPO}
+    targetRevision: ${GIT_BRANCH}
+    path: keycloak/tenant/apps
+    helm:
+      values: |
+        deployer:
+          guid: ${TENANT_GUID}
+        keycloak:
+          namespace: keycloak
+          realmName: sso
+        users:
+          mode: generate
+          generate:
+            count: ${NUM_USERS}
+            prefix: ${USER_BASE}
+            startNumber: 1
+          password: ${USER_PASSWORD}
+        namespaces:
+          mode: generate
+          generate:
+            count: ${NUM_USERS}
+            prefix: ${USER_BASE}
+            suffix: -project
+            startNumber: 1
+        resourceQuota:
+          enabled: true
+        limitRange:
+          enabled: true
+        networkPolicy:
+          enabled: false
+        rbac:
+          namespaceAdmin:
+            enabled: true
+            clusterRole: admin
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openshift-gitops
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+TENANT_EOF
 fi
 
-# Update parent apps
-echo "Updating parent app manifests..."
-if [ "$DEPLOY_INFRA" = "true" ] && [ -f "infra/parent-app.yaml" ]; then
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        sed -i '' "s|repoURL: .*|repoURL: $GIT_REPO|g" "infra/parent-app.yaml"
-        sed -i '' "s|targetRevision: .*|targetRevision: $GIT_BRANCH|g" "infra/parent-app.yaml"
-    else
-        sed -i "s|repoURL: .*|repoURL: $GIT_REPO|g" "infra/parent-app.yaml"
-        sed -i "s|targetRevision: .*|targetRevision: $GIT_BRANCH|g" "infra/parent-app.yaml"
-    fi
-fi
-
-if [ "$DEPLOY_TENANT" = "true" ] && [ -f "tenant/parent-app.yaml" ]; then
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        sed -i '' "s|repoURL: .*|repoURL: $GIT_REPO|g" "tenant/parent-app.yaml"
-        sed -i '' "s|targetRevision: .*|targetRevision: $GIT_BRANCH|g" "tenant/parent-app.yaml"
-    else
-        sed -i "s|repoURL: .*|repoURL: $GIT_REPO|g" "tenant/parent-app.yaml"
-        sed -i "s|targetRevision: .*|targetRevision: $GIT_BRANCH|g" "tenant/parent-app.yaml"
-    fi
-fi
-
-if [ "$DEPLOY_INFRA" = "true" ] && [ "$DEPLOY_TENANT" = "true" ] && [ -f "platform-parent-app.yaml" ]; then
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        sed -i '' "s|repoURL: .*|repoURL: $GIT_REPO|g" "platform-parent-app.yaml"
-        sed -i '' "s|targetRevision: .*|targetRevision: $GIT_BRANCH|g" "platform-parent-app.yaml"
-    else
-        sed -i "s|repoURL: .*|repoURL: $GIT_REPO|g" "platform-parent-app.yaml"
-        sed -i "s|targetRevision: .*|targetRevision: $GIT_BRANCH|g" "platform-parent-app.yaml"
-    fi
-fi
-
-# Infrastructure-specific configuration
+# Set helm values on ArgoCD Application manifests
 if [ "$DEPLOY_INFRA" = "true" ]; then
-    echo "Configuring infrastructure chart values..."
+    echo "Setting helm values on infra apps..."
 
-    # Update ingress domain
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        sed -i '' "s|ingressDomain: .*|ingressDomain: $INGRESS_DOMAIN|g" infra/charts/keycloak-instance/values.yaml
-        sed -i '' "s|ingressDomain: .*|ingressDomain: $INGRESS_DOMAIN|g" infra/charts/keycloak-oauth/values.yaml
-    else
-        sed -i "s|ingressDomain: .*|ingressDomain: $INGRESS_DOMAIN|g" infra/charts/keycloak-instance/values.yaml
-        sed -i "s|ingressDomain: .*|ingressDomain: $INGRESS_DOMAIN|g" infra/charts/keycloak-oauth/values.yaml
-    fi
+    # keycloak-instance
+    set_helm_values "infra/apps/keycloak-instance.yaml" "namespace: keycloak
+deployer:
+  domain: ${INGRESS_DOMAIN}
+keycloak:
+  hostname: sso
+  instances: 1"
 
-    # Update PostgreSQL password
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        sed -i '' "s|password: changeme123|password: $PG_PASSWORD|g" infra/charts/keycloak-postgres/values.yaml
-    else
-        sed -i "s|password: changeme123|password: $PG_PASSWORD|g" infra/charts/keycloak-postgres/values.yaml
-    fi
+    # keycloak-postgres
+    set_helm_values "infra/apps/keycloak-postgres.yaml" "namespace: keycloak
+postgresql:
+  database:
+    name: keycloak
+    user: keycloak
+    password: ${PG_PASSWORD}
+  storage:
+    size: 50Gi"
 
-    # Update OAuth secret
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        sed -i '' "s|secret: changeme123|secret: $OAUTH_SECRET|g" infra/charts/keycloak-realm/values.yaml
-        sed -i '' "s|secret: changeme123|secret: $OAUTH_SECRET|g" infra/charts/keycloak-oauth/values.yaml
-    else
-        sed -i "s|secret: changeme123|secret: $OAUTH_SECRET|g" infra/charts/keycloak-realm/values.yaml
-        sed -i "s|secret: changeme123|secret: $OAUTH_SECRET|g" infra/charts/keycloak-oauth/values.yaml
-    fi
+    # keycloak-realm
+    set_helm_values "infra/apps/keycloak-realm.yaml" "namespace: keycloak
+realm:
+  name: sso
+  client:
+    id: idp-4-ocp
+    secret: ${OAUTH_SECRET}
+  admin:
+    enabled: ${ADMIN_ENABLED}
+    username: ${ADMIN_USER}
+    password: ${ADMIN_PASSWORD}"
 
-    # Update admin user
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        sed -i '' "s|username: admin|username: $ADMIN_USER|g" infra/charts/keycloak-realm/values.yaml
-        sed -i '' "s|username: admin|username: $ADMIN_USER|g" infra/charts/keycloak-oauth/values.yaml
-        sed -i '' "/users:/,/admin:/{s|password: changeme123|password: $ADMIN_PASSWORD|;}" infra/charts/keycloak-realm/values.yaml
-        sed -i '' "s|enabled: true  # Disable admin user creation|enabled: $ADMIN_ENABLED|g" infra/charts/keycloak-realm/values.yaml
-        sed -i '' "s|enabled: true$|enabled: $ADMIN_ENABLED|g" infra/charts/keycloak-oauth/values.yaml
-    else
-        sed -i "s|username: admin|username: $ADMIN_USER|g" infra/charts/keycloak-realm/values.yaml
-        sed -i "s|username: admin|username: $ADMIN_USER|g" infra/charts/keycloak-oauth/values.yaml
-        sed -i "/users:/,/admin:/{s|password: changeme123|password: $ADMIN_PASSWORD|;}" infra/charts/keycloak-realm/values.yaml
-        sed -i "s|enabled: true  # Disable admin user creation|enabled: $ADMIN_ENABLED|g" infra/charts/keycloak-realm/values.yaml
-        sed -i "s|enabled: true$|enabled: $ADMIN_ENABLED|g" infra/charts/keycloak-oauth/values.yaml
-    fi
-
-    # Update regular users (in realm - for infra mode, these are created in Keycloak)
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        sed -i '' "s|count: 5|count: 0|g" infra/charts/keycloak-realm/values.yaml
-        sed -i '' "s|usernameBase: user|usernameBase: $USER_BASE|g" infra/charts/keycloak-realm/values.yaml
-    else
-        sed -i "s|count: 5|count: 0|g" infra/charts/keycloak-realm/values.yaml
-        sed -i "s|usernameBase: user|usernameBase: $USER_BASE|g" infra/charts/keycloak-realm/values.yaml
-    fi
-
-    # Update kubeadmin removal
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        sed -i '' "s|enabled: false  # Enable to remove kubeadmin user|enabled: $REMOVE_KUBEADMIN_ENABLED|g" infra/charts/keycloak-oauth/values.yaml
-    else
-        sed -i "s|enabled: false  # Enable to remove kubeadmin user|enabled: $REMOVE_KUBEADMIN_ENABLED|g" infra/charts/keycloak-oauth/values.yaml
-    fi
+    # keycloak-oauth
+    set_helm_values "infra/apps/keycloak-oauth.yaml" "deployer:
+  domain: ${INGRESS_DOMAIN}
+oauth:
+  client:
+    id: idp-4-ocp
+    secret: ${OAUTH_SECRET}
+  keycloak:
+    hostname: sso
+    realmName: sso
+rbac:
+  clusterAdmin:
+    enabled: ${ADMIN_ENABLED}
+    username: ${ADMIN_USER}
+  removeKubeadmin:
+    enabled: ${REMOVE_KUBEADMIN_ENABLED}"
 fi
 
-# Tenant-specific configuration
 if [ "$DEPLOY_TENANT" = "true" ]; then
-    echo "Configuring tenant chart values..."
+    echo "Setting helm values on tenant apps..."
 
-    # Note: Tenant user configuration would go in tenant/charts/keycloak-users/values.yaml
-    # This is typically done via separate tenant values files, not this script
-    # For now, we just ensure the Git repo is updated above
+    # keycloak-users
+    set_helm_values "tenant/apps/keycloak-users.yaml" "deployer:
+  guid: ${TENANT_GUID}
+keycloak:
+  namespace: keycloak
+  realmName: sso
+users:
+  mode: generate
+  generate:
+    count: ${NUM_USERS}
+    prefix: ${USER_BASE}
+    startNumber: 1
+  password: ${USER_PASSWORD}"
+
+    # tenant-namespaces
+    set_helm_values "tenant/apps/tenant-namespaces.yaml" "deployer:
+  guid: ${TENANT_GUID}
+namespaces:
+  mode: generate
+  generate:
+    count: ${NUM_USERS}
+    prefix: ${USER_BASE}
+    suffix: -project
+    startNumber: 1
+resourceQuota:
+  enabled: true
+limitRange:
+  enabled: true
+networkPolicy:
+  enabled: false"
+
+    # tenant-rbac
+    set_helm_values "tenant/apps/tenant-rbac.yaml" "deployer:
+  guid: ${TENANT_GUID}
+users:
+  mode: generate
+  generate:
+    count: ${NUM_USERS}
+    prefix: ${USER_BASE}
+    startNumber: 1
+namespaces:
+  mode: generate
+  generate:
+    count: ${NUM_USERS}
+    prefix: ${USER_BASE}
+    suffix: -project
+    startNumber: 1
+rbac:
+  namespaceAdmin:
+    enabled: true
+    clusterRole: admin"
 fi
 
 echo -e "${GREEN}Configuration applied successfully!${NC}\n"
@@ -381,6 +551,8 @@ fi
 
 if [ "$DEPLOY_TENANT" = "true" ]; then
     cat >> "$CREDS_FILE" <<EOF
+Tenant GUID: $TENANT_GUID
+
 Regular Users:
   Usernames: ${USER_BASE}1 through ${USER_BASE}${NUM_USERS}
   Password: $USER_PASSWORD
@@ -396,24 +568,27 @@ echo ""
 echo -e "${YELLOW}IMPORTANT: Before deploying, grant ArgoCD permissions:${NC}"
 echo "   oc apply -f argocd-rbac.yaml"
 echo ""
-echo "1. Review the configuration in the chart values files:"
+echo "1. Review the helm values in the ArgoCD app manifests:"
 
 if [ "$DEPLOY_INFRA" = "true" ]; then
-    echo "   - infra/charts/*/values.yaml"
+    echo "   - infra/apps/*.yaml"
 fi
 if [ "$DEPLOY_TENANT" = "true" ]; then
-    echo "   - tenant/charts/*/values.yaml"
+    echo "   - tenant/apps/*.yaml"
 fi
 
+echo ""
+echo "   NOTE: Environment-specific values are set as ArgoCD helm values overrides,"
+echo "   not in chart values files. Chart defaults remain clean in git."
 echo ""
 echo "2. Commit and push changes to your Git repository:"
 
 if [ "$DEPLOY_INFRA" = "true" ] && [ "$DEPLOY_TENANT" = "true" ]; then
-    echo "   git add infra/ tenant/ platform-parent-app.yaml argocd-rbac.yaml"
+    echo "   git add infra/apps/ tenant/apps/ infra/keycloak-infra-app.yaml tenant/keycloak-tenant-app.yaml"
 elif [ "$DEPLOY_INFRA" = "true" ]; then
-    echo "   git add infra/ argocd-rbac.yaml"
+    echo "   git add infra/apps/ infra/keycloak-infra-app.yaml"
 else
-    echo "   git add tenant/ argocd-rbac.yaml"
+    echo "   git add tenant/apps/ tenant/keycloak-tenant-app.yaml"
 fi
 
 echo "   git commit -m 'Configure Keycloak deployment'"
@@ -422,14 +597,11 @@ echo ""
 
 if [ "$DEPLOY_INFRA" = "true" ] && [ "$DEPLOY_TENANT" = "true" ]; then
     echo "3. Deploy the complete platform:"
-    echo "   oc apply -f platform-parent-app.yaml"
-    echo ""
-    echo "   Or deploy individually:"
-    echo "   oc apply -f infra/parent-app.yaml"
-    echo "   oc apply -f tenant/parent-app.yaml"
+    echo "   oc apply -f infra/keycloak-infra-app.yaml"
+    echo "   oc apply -f tenant/keycloak-tenant-app.yaml"
 elif [ "$DEPLOY_INFRA" = "true" ]; then
     echo "3. Deploy the infrastructure:"
-    echo "   oc apply -f infra/parent-app.yaml"
+    echo "   oc apply -f infra/keycloak-infra-app.yaml"
     echo ""
     echo "   This will deploy:"
     echo "   - Keycloak operator"
@@ -439,7 +611,7 @@ elif [ "$DEPLOY_INFRA" = "true" ]; then
     echo "   - OpenShift OAuth integration"
 else
     echo "3. Deploy the tenant resources:"
-    echo "   oc apply -f tenant/parent-app.yaml"
+    echo "   oc apply -f tenant/keycloak-tenant-app.yaml"
     echo ""
     echo "   This will deploy:"
     echo "   - Keycloak users"

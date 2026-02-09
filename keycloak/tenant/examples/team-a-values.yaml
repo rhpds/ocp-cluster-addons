@@ -2,7 +2,7 @@
 # Example: Development Team A
 # GUID-based tenant with generated users and namespaces
 
-tenant:
+deployer:
   guid: "team-a"
 
 # Keycloak configuration
@@ -58,8 +58,8 @@ resourceQuota:
   requests:
     cpu: "4"
     memory: 8Gi
+    storage: 100Gi
   persistentvolumeclaims: "10"
-  requests.storage: 100Gi
   pods: "20"
   services: "15"
   secrets: "30"
@@ -103,4 +103,4 @@ attributes:
   department: engineering
   team: team-a
   cost_center: "12345"
-  tenant_id: "{{ .Values.tenant.guid }}"
+  tenant_id: "{{ .Values.deployer.guid }}"

@@ -4,8 +4,6 @@ kind: Application
 metadata:
   name: tenant-rbac
   namespace: openshift-gitops
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
   labels:
     app.kubernetes.io/part-of: keycloak-platform
     component: tenant
@@ -16,8 +14,26 @@ spec:
     targetRevision: keycloak-wip
     path: keycloak/tenant/charts/tenant-rbac
     helm:
-      valueFiles:
-        - values.yaml
+      values: |
+        deployer:
+          guid: default
+        users:
+          mode: generate
+          generate:
+            count: 5
+            prefix: user
+            startNumber: 1
+        namespaces:
+          mode: generate
+          generate:
+            count: 5
+            prefix: user
+            suffix: -project
+            startNumber: 1
+        rbac:
+          namespaceAdmin:
+            enabled: true
+            clusterRole: admin
   destination:
     server: https://kubernetes.default.svc
     namespace: default
