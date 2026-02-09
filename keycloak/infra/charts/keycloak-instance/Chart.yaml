@@ -1,6 +1,0 @@
-apiVersion: v2
-name: keycloak-instance
-description: Keycloak instance and routing
-type: application
-version: 1.0.0
-appVersion: "26.2"

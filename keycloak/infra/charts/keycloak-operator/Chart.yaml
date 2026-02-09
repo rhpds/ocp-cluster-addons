@@ -1,6 +1,0 @@
-apiVersion: v2
-name: keycloak-operator
-description: Red Hat Build of Keycloak Operator
-type: application
-version: 1.0.0
-appVersion: "26.2"

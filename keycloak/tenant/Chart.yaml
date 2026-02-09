@@ -1,0 +1,5 @@
+apiVersion: v2
+name: keycloak-tenant
+description: Keycloak tenant resources - users, namespaces, RBAC
+version: 0.1.0
+type: application

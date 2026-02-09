@@ -12,7 +12,7 @@ spec:
   source:
     repoURL: https://github.com/rhpds/ocp-cluster-addons.git
     targetRevision: keycloak-wip
-    path: keycloak/infra/apps
+    path: keycloak/infra
     helm:
       values: |
         namespace: keycloak
@@ -59,7 +59,7 @@ spec:
             enabled: false
   destination:
     server: https://kubernetes.default.svc
-    namespace: openshift-gitops
+    namespace: keycloak
   syncPolicy:
     automated:
       prune: true

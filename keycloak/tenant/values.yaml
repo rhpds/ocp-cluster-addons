@@ -1,0 +1,106 @@
+---
+# Deployer-injected values
+deployer:
+  domain: apps.example.com
+  apiUrl: ""
+  guid: "default"
+
+# --- Keycloak ---
+keycloak:
+  namespace: keycloak
+  realmName: sso
+
+# --- Users ---
+users:
+  mode: generate
+  generate:
+    count: 5
+    prefix: user
+    startNumber: 1
+  explicit:
+    usernames: []
+    appendGuid: true
+  password: changeme123
+  emailDomain: demo.redhat.com
+  emailVerified: true
+  firstName: User
+  lastName: Demo
+  temporary: false
+  realmRoles:
+    - user
+  groups: []
+
+# Optional: Additional user attributes
+attributes: {}
+
+# --- Namespaces ---
+namespaces:
+  mode: generate
+  generate:
+    count: 5
+    prefix: user
+    suffix: -project
+    startNumber: 1
+  explicit:
+    names: []
+  labels:
+    tenant: "true"
+    managed-by: argocd
+  annotations: {}
+
+# --- Resource Quotas ---
+resourceQuota:
+  enabled: true
+  limits:
+    cpu: "4"
+    memory: 8Gi
+  requests:
+    cpu: "2"
+    memory: 4Gi
+    storage: 50Gi
+  persistentvolumeclaims: "5"
+  pods: "10"
+  services: "10"
+  secrets: "20"
+  configmaps: "20"
+
+# --- Limit Ranges ---
+limitRange:
+  enabled: true
+  defaultLimits:
+    cpu: 500m
+    memory: 512Mi
+  defaultRequests:
+    cpu: 100m
+    memory: 128Mi
+  maxLimits:
+    cpu: "2"
+    memory: 2Gi
+  minLimits:
+    cpu: 10m
+    memory: 64Mi
+
+# --- Network Policies ---
+networkPolicy:
+  enabled: false
+  allowIngress: true
+  allowEgress: true
+  allowTenantCommunication: false
+
+# --- RBAC ---
+rbac:
+  namespaceAdmin:
+    enabled: true
+    clusterRole: admin
+  sharedNamespaceAccess:
+    enabled: false
+    namespaces: []
+    clusterRole: view
+  customRoleBindings:
+    enabled: false
+    roles: []
+
+# --- Group RBAC ---
+groupRbac:
+  enabled: false
+  bindings: []

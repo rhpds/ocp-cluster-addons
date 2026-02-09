@@ -1,6 +1,0 @@
-apiVersion: v2
-name: keycloak-realm
-description: Keycloak realm configuration with users
-type: application
-version: 1.0.0
-appVersion: "26.2"

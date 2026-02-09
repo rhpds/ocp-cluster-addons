@@ -1,0 +1,5 @@
+apiVersion: v2
+name: keycloak-infra
+description: Keycloak infrastructure for OpenShift - operator, instance, PostgreSQL, realm, OAuth
+version: 0.1.0
+type: application

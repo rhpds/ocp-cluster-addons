@@ -216,61 +216,10 @@ fi
 # Apply configuration
 echo -e "\n${GREEN}Applying configuration...${NC}"
 
-# Helper function: update repoURL and targetRevision in an ArgoCD manifest
-# Usage: set_git_source <file> <repo-url> <branch>
-set_git_source() {
-    local file="$1"
-    local repo="$2"
-    local branch="$3"
 
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        sed -i '' "s|repoURL: .*|repoURL: $repo|g" "$file"
-        sed -i '' "s|targetRevision: .*|targetRevision: $branch|g" "$file"
-    else
-        sed -i "s|repoURL: .*|repoURL: $repo|g" "$file"
-        sed -i "s|targetRevision: .*|targetRevision: $branch|g" "$file"
-    fi
-}
-
-# Helper function: replace the helm.values block in an ArgoCD Application manifest
-# Usage: set_helm_values <file> <yaml-string>
-# The yaml-string should be the inline YAML content (without the "values: |" prefix)
-set_helm_values() {
-    local file="$1"
-    local values_content="$2"
-
-    # Build the indented values block (8 spaces for values: |, 10 spaces for content)
-    local values_block
-    values_block="      values: |"
-    while IFS= read -r line; do
-        values_block="${values_block}"$'\n'"        ${line}"
-    done <<< "$values_content"
-
-    # Use python to replace the values block (handles multiline reliably)
-    python3 -c "
-import re, sys
-with open('$file', 'r') as f:
-    content = f.read()
-# Match 'values: |' followed by indented lines (more indented than 'values:')
-content = re.sub(
-    r'      values: \|(\n        .*)*',
-    sys.stdin.read().rstrip(),
-    content,
-    count=1
-)
-with open('$file', 'w') as f:
-    f.write(content)
-" <<< "$values_block"
-}
-
-# Update Git source on all relevant app manifests
+# Write keycloak-infra-app.yaml
 if [ "$DEPLOY_INFRA" = "true" ]; then
-    echo "Updating infrastructure app manifests..."
-    for app_file in infra/apps/*.yaml; do
-        [ -f "$app_file" ] && set_git_source "$app_file" "$GIT_REPO" "$GIT_BRANCH"
-    done
-
-    # Write keycloak-infra-app.yaml (app-of-apps)
+    echo "Writing infra/keycloak-infra-app.yaml..."
     cat > "infra/keycloak-infra-app.yaml" <<INFRA_EOF
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -286,7 +235,7 @@ spec:
   source:
     repoURL: ${GIT_REPO}
     targetRevision: ${GIT_BRANCH}
-    path: keycloak/infra/apps
+    path: keycloak/infra
     helm:
       values: |
         namespace: keycloak
@@ -333,7 +282,7 @@ spec:
             enabled: ${REMOVE_KUBEADMIN_ENABLED}
   destination:
     server: https://kubernetes.default.svc
-    namespace: openshift-gitops
+    namespace: keycloak
   syncPolicy:
     automated:
       prune: true
@@ -343,13 +292,9 @@ spec:
 INFRA_EOF
 fi
 
+# Write keycloak-tenant-app.yaml
 if [ "$DEPLOY_TENANT" = "true" ]; then
-    echo "Updating tenant app manifests..."
-    for app_file in tenant/apps/*.yaml; do
-        [ -f "$app_file" ] && set_git_source "$app_file" "$GIT_REPO" "$GIT_BRANCH"
-    done
-
-    # Write keycloak-tenant-app.yaml (app-of-apps)
+    echo "Writing tenant/keycloak-tenant-app.yaml..."
     cat > "tenant/keycloak-tenant-app.yaml" <<TENANT_EOF
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -365,7 +310,7 @@ spec:
   source:
     repoURL: ${GIT_REPO}
     targetRevision: ${GIT_BRANCH}
-    path: keycloak/tenant/apps
+    path: keycloak/tenant
     helm:
       values: |
         deployer:
@@ -399,7 +344,7 @@ spec:
             clusterRole: admin
   destination:
     server: https://kubernetes.default.svc
-    namespace: openshift-gitops
+    namespace: keycloak
   syncPolicy:
     automated:
       prune: true
@@ -407,114 +352,6 @@ spec:
     syncOptions:
       - CreateNamespace=true
 TENANT_EOF
-fi
-
-# Set helm values on ArgoCD Application manifests
-if [ "$DEPLOY_INFRA" = "true" ]; then
-    echo "Setting helm values on infra apps..."
-
-    # keycloak-instance
-    set_helm_values "infra/apps/keycloak-instance.yaml" "namespace: keycloak
-deployer:
-  domain: ${INGRESS_DOMAIN}
-keycloak:
-  hostname: sso
-  instances: 1"
-
-    # keycloak-postgres
-    set_helm_values "infra/apps/keycloak-postgres.yaml" "namespace: keycloak
-postgresql:
-  database:
-    name: keycloak
-    user: keycloak
-    password: ${PG_PASSWORD}
-  storage:
-    size: 50Gi"
-
-    # keycloak-realm
-    set_helm_values "infra/apps/keycloak-realm.yaml" "namespace: keycloak
-realm:
-  name: sso
-  client:
-    id: idp-4-ocp
-    secret: ${OAUTH_SECRET}
-  admin:
-    enabled: ${ADMIN_ENABLED}
-    username: ${ADMIN_USER}
-    password: ${ADMIN_PASSWORD}"
-
-    # keycloak-oauth
-    set_helm_values "infra/apps/keycloak-oauth.yaml" "deployer:
-  domain: ${INGRESS_DOMAIN}
-oauth:
-  client:
-    id: idp-4-ocp
-    secret: ${OAUTH_SECRET}
-  keycloak:
-    hostname: sso
-    realmName: sso
-rbac:
-  clusterAdmin:
-    enabled: ${ADMIN_ENABLED}
-    username: ${ADMIN_USER}
-  removeKubeadmin:
-    enabled: ${REMOVE_KUBEADMIN_ENABLED}"
-fi
-
-if [ "$DEPLOY_TENANT" = "true" ]; then
-    echo "Setting helm values on tenant apps..."
-
-    # keycloak-users
-    set_helm_values "tenant/apps/keycloak-users.yaml" "deployer:
-  guid: ${TENANT_GUID}
-keycloak:
-  namespace: keycloak
-  realmName: sso
-users:
-  mode: generate
-  generate:
-    count: ${NUM_USERS}
-    prefix: ${USER_BASE}
-    startNumber: 1
-  password: ${USER_PASSWORD}"
-
-    # tenant-namespaces
-    set_helm_values "tenant/apps/tenant-namespaces.yaml" "deployer:
-  guid: ${TENANT_GUID}
-namespaces:
-  mode: generate
-  generate:
-    count: ${NUM_USERS}
-    prefix: ${USER_BASE}
-    suffix: -project
-    startNumber: 1
-resourceQuota:
-  enabled: true
-limitRange:
-  enabled: true
-networkPolicy:
-  enabled: false"
-
-    # tenant-rbac
-    set_helm_values "tenant/apps/tenant-rbac.yaml" "deployer:
-  guid: ${TENANT_GUID}
-users:
-  mode: generate
-  generate:
-    count: ${NUM_USERS}
-    prefix: ${USER_BASE}
-    startNumber: 1
-namespaces:
-  mode: generate
-  generate:
-    count: ${NUM_USERS}
-    prefix: ${USER_BASE}
-    suffix: -project
-    startNumber: 1
-rbac:
-  namespaceAdmin:
-    enabled: true
-    clusterRole: admin"
 fi
 
 echo -e "${GREEN}Configuration applied successfully!${NC}\n"
@@ -568,27 +405,27 @@ echo ""
 echo -e "${YELLOW}IMPORTANT: Before deploying, grant ArgoCD permissions:${NC}"
 echo "   oc apply -f argocd-rbac.yaml"
 echo ""
-echo "1. Review the helm values in the ArgoCD app manifests:"
+echo "1. Review the helm values in the parent app manifests:"
 
 if [ "$DEPLOY_INFRA" = "true" ]; then
-    echo "   - infra/apps/*.yaml"
+    echo "   - infra/keycloak-infra-app.yaml"
 fi
 if [ "$DEPLOY_TENANT" = "true" ]; then
-    echo "   - tenant/apps/*.yaml"
+    echo "   - tenant/keycloak-tenant-app.yaml"
 fi
 
 echo ""
-echo "   NOTE: Environment-specific values are set as ArgoCD helm values overrides,"
-echo "   not in chart values files. Chart defaults remain clean in git."
+echo "   NOTE: All configuration is in the ArgoCD Application helm values."
+echo "   These override defaults in the chart's values.yaml."
 echo ""
 echo "2. Commit and push changes to your Git repository:"
 
 if [ "$DEPLOY_INFRA" = "true" ] && [ "$DEPLOY_TENANT" = "true" ]; then
-    echo "   git add infra/apps/ tenant/apps/ infra/keycloak-infra-app.yaml tenant/keycloak-tenant-app.yaml"
+    echo "   git add infra/keycloak-infra-app.yaml tenant/keycloak-tenant-app.yaml"
 elif [ "$DEPLOY_INFRA" = "true" ]; then
-    echo "   git add infra/apps/ infra/keycloak-infra-app.yaml"
+    echo "   git add infra/keycloak-infra-app.yaml"
 else
-    echo "   git add tenant/apps/ tenant/keycloak-tenant-app.yaml"
+    echo "   git add tenant/keycloak-tenant-app.yaml"
 fi
 
 echo "   git commit -m 'Configure Keycloak deployment'"

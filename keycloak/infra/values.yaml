@@ -1,0 +1,139 @@
+---
+namespace: keycloak
+
+# Deployer-injected values
+deployer:
+  domain: apps.example.com
+  apiUrl: ""
+  guid: ""
+
+# --- Operator ---
+operator:
+  name: rhbk-operator
+  channel: stable-v26.2
+  installPlanApproval: Automatic
+  startingCSV: ""
+  installPlanApprover:
+    enabled: false
+    enforceCSVMatch: true
+    timeout: 600
+    backoffLimit: 3
+    image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+  catalogSource:
+    enabled: false
+    name: custom-redhat-catalog
+    image: quay.io/gpte-devops-automation/olm_snapshot_redhat_catalog
+    tag: v4.20_2025_10_23
+
+# --- Keycloak Instance ---
+keycloak:
+  hostname: sso
+  instances: 1
+  database:
+    vendor: postgres
+    database: keycloak
+    host: keycloak-pgsql
+    secretName: keycloak-pgsql-user
+  additionalOptions:
+    - name: enable-recovery
+      value: 'true'
+  transaction:
+    xaEnabled: true
+  http:
+    httpEnabled: false
+    tlsSecret: keycloak-tls
+  route:
+    enabled: true
+    tls:
+      termination: reencrypt
+      insecureEdgeTerminationPolicy: Redirect
+
+# --- PostgreSQL ---
+postgresql:
+  image: registry.redhat.io/rhel9/postgresql-16:1-1754433677
+  database:
+    name: keycloak
+    user: keycloak
+    password: changeme123
+  resources:
+    limits:
+      cpu: "1"
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+  storage:
+    size: 50Gi
+    accessMode: ReadWriteOnce
+  service:
+    port: 5432
+
+# --- Realm ---
+realm:
+  name: sso
+  enabled: true
+  sslRequired: external
+  registrationAllowed: true
+  loginWithEmailAllowed: true
+  duplicateEmailsAllowed: false
+  client:
+    id: idp-4-ocp
+    secret: changeme123
+    enabled: true
+    publicClient: false
+    standardFlowEnabled: true
+    directAccessGrantsEnabled: true
+    serviceAccountsEnabled: true
+    frontchannelLogout: false
+    protocol: openid-connect
+    redirectUris:
+      - "*"
+  admin:
+    enabled: true
+    username: admin
+    password: changeme123
+    email: admin@demo.redhat.com
+    firstName: Admin
+    lastName: Demo
+    emailVerified: true
+    temporary: false
+    realmRoles:
+      - admin
+  roles:
+    - name: user
+      description: "Default user role"
+    - name: admin
+      description: "Administrator role"
+  groups:
+    - name: admins
+    - name: users
+
+# --- OAuth ---
+oauth:
+  identityProvider:
+    name: rhbk
+    type: OpenID
+    mappingMethod: claim
+  client:
+    id: idp-4-ocp
+    secret: changeme123
+    secretName: openid-client-secret-bb6zw
+  keycloak:
+    hostname: sso
+    realmName: sso
+  claims:
+    email:
+      - email
+    name:
+      - name
+    preferredUsername:
+      - preferred_username
+  extraScopes: []
+
+# --- RBAC ---
+rbac:
+  clusterAdmin:
+    enabled: true
+    username: admin
+  removeKubeadmin:
+    enabled: false
