@@ -10,14 +10,14 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/rhpds/ocp-cluster-addons.git
-    targetRevision: keycloak-wip
+    repoURL: ${GIT_REPO}
+    targetRevision: ${GIT_BRANCH}
     path: keycloak/infra
     helm:
       values: |
         namespace: keycloak
         deployer:
-          domain: apps.cluster-np782.dynamic.redhatworkshops.io
+          domain: ${INGRESS_DOMAIN}
         operator:
           name: rhbk-operator
           channel: stable-v26.2
@@ -32,20 +32,22 @@ spec:
           database:
             name: keycloak
             user: keycloak
-            password: wCFnUS5MvX8Y6
+            password: ${PG_PASSWORD}
           storage:
             size: 50Gi
         realm:
           name: sso
           client:
             id: idp-4-ocp
+            secret: ${OAUTH_SECRET}
           admin:
             enabled: true
             username: admin
-            password: PUeT4a7z5hDrjQb5
+            password: ${ADMIN_PASSWORD}
         oauth:
           client:
             id: idp-4-ocp
+            secret: ${OAUTH_SECRET}
           keycloak:
             hostname: sso
             realmName: sso

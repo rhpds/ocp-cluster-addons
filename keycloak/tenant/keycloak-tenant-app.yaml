@@ -10,28 +10,28 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/rhpds/ocp-cluster-addons.git
-    targetRevision: keycloak-wip
+    repoURL: ${GIT_REPO}
+    targetRevision: ${GIT_BRANCH}
     path: keycloak/tenant
     helm:
       values: |
         deployer:
-          guid: xyzzy
+          guid: ${GUID}
         keycloak:
           namespace: keycloak
           realmName: sso
         users:
           mode: generate
           generate:
-            count: 5
-            prefix: user
+            count: ${USER_COUNT}
+            prefix: ${USER_PREFIX}
             startNumber: 1
-          password: openshift
+          password: ${USER_PASSWORD}
         namespaces:
           mode: generate
           generate:
-            count: 5
-            prefix: user
+            count: ${USER_COUNT}
+            prefix: ${USER_PREFIX}
             suffix: -project
             startNumber: 1
         resourceQuota:
