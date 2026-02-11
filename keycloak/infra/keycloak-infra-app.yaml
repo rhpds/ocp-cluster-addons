@@ -17,7 +17,7 @@ spec:
       values: |
         namespace: keycloak
         deployer:
-          domain: apps.cluster-lpx74.dyn.redhatworkshops.io
+          domain: apps.cluster-np782.dynamic.redhatworkshops.io
         operator:
           name: rhbk-operator
           channel: stable-v26.2
@@ -32,7 +32,7 @@ spec:
           database:
             name: keycloak
             user: keycloak
-            password: openshift
+            password: wCFnUS5MvX8Y6
           storage:
             size: 50Gi
         realm:
@@ -42,7 +42,7 @@ spec:
           admin:
             enabled: true
             username: admin
-            password: openshift
+            password: PUeT4a7z5hDrjQb5
         oauth:
           client:
             id: idp-4-ocp
