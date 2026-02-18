@@ -27,7 +27,7 @@ users:
   lastName: Demo
   temporary: false
   realmRoles:
-    - user
+    - name: user
   groups: []
 
 # Optional: Additional user attributes
@@ -104,3 +104,12 @@ rbac:
 groupRbac:
   enabled: false
   bindings: []
+
+# --- Cleanup ---
+# Requires ArgoCD v2.10+ for PreDelete hook support.
+cleanup:
+  realmDeletion:
+    enabled: false
+    image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+    adminSecret: keycloak-initial-admin
+    keycloakServiceUrl: https://keycloak-service:8443

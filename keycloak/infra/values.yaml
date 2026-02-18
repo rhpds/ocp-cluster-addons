@@ -9,7 +9,8 @@ deployer:
 
 # --- Operator ---
 operator:
-  name: rhbk-operator
+  #name: rhbk-operator
+  name: keycloak-operator
   channel: stable-v26.2
   installPlanApproval: Automatic
   startingCSV: ""
@@ -36,7 +37,7 @@ keycloak:
     secretName: keycloak-pgsql-user
   additionalOptions:
     - name: enable-recovery
-      value: 'true'
+      value: "true"
   transaction:
     xaEnabled: true
   http:

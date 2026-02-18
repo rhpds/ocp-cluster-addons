@@ -28,7 +28,7 @@ argocd/
 ### 1. keycloak-operator
 - Installs the Red Hat Build of Keycloak operator via OLM
 - Creates namespace, OperatorGroup, and Subscription
-- Optional: Custom CatalogSource for disconnected environments
+- Optional: Custom CatalogSource
 
 ### 2. keycloak-postgres
 - Deploys PostgreSQL 16 as the Keycloak database
@@ -154,7 +154,6 @@ rbac:
 ```
 
 #### Custom Catalog Source
-For disconnected environments:
 
 **argocd/charts/keycloak-operator/values.yaml**:
 ```yaml

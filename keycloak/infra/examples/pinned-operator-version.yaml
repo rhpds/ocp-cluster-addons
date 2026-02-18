@@ -40,7 +40,6 @@ operator:
     image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
 
   # Optional: Use custom catalog source
-  # Useful for disconnected environments or testing
   catalogSource:
     enabled: false
     name: custom-redhat-catalog

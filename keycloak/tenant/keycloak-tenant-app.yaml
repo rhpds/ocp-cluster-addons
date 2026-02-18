@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: keycloak-tenants
+  name: tenant-${GUID}-keycloak
   namespace: openshift-gitops
   labels:
     app.kubernetes.io/part-of: keycloak-platform
@@ -20,20 +20,9 @@ spec:
         keycloak:
           namespace: keycloak
           realmName: sso
-        users:
-          mode: generate
-          generate:
-            count: ${USER_COUNT}
-            prefix: ${USER_PREFIX}
-            startNumber: 1
-          password: ${USER_PASSWORD}
-        namespaces:
-          mode: generate
-          generate:
-            count: ${USER_COUNT}
-            prefix: ${USER_PREFIX}
-            suffix: -project
-            startNumber: 1
+${USERS_BLOCK}
+${NAMESPACES_BLOCK}
+${CLEANUP_BLOCK}
         resourceQuota:
           enabled: true
         limitRange:

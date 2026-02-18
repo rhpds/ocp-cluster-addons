@@ -1,99 +1,69 @@
+{{- $userList := list }}
 {{- if eq .Values.users.mode "generate" }}
-{{- if gt (.Values.users.generate.count | int) 0 }}
-{{- range $i := until (.Values.users.generate.count | int) }}
-{{- $userNum := add ($.Values.users.generate.startNumber | int) $i }}
-{{- $username := printf "%s%d-%s" $.Values.users.generate.prefix $userNum $.Values.deployer.guid }}
+  {{- range $i := until (.Values.users.generate.count | int) }}
+    {{- $userNum := add ($.Values.users.generate.startNumber | int) $i }}
+    {{- $username := printf "%s%d-%s" $.Values.users.generate.prefix $userNum $.Values.deployer.guid }}
+    {{- $userList = append $userList (dict "username" $username "firstName" (printf "%s%d" $.Values.users.firstName $userNum)) }}
+  {{- end }}
+{{- else if eq .Values.users.mode "explicit" }}
+  {{- range $username := .Values.users.explicit.usernames }}
+    {{- $fullUsername := $username }}
+    {{- if $.Values.users.explicit.appendGuid }}
+      {{- $fullUsername = printf "%s-%s" $username $.Values.deployer.guid }}
+    {{- end }}
+    {{- $userList = append $userList (dict "username" $fullUsername "firstName" $username) }}
+  {{- end }}
+{{- end }}
 ---
 apiVersion: k8s.keycloak.org/v2alpha1
-kind: KeycloakUser
+kind: KeycloakRealmImport
 metadata:
-  name: {{ $username }}
-  namespace: {{ $.Values.keycloak.namespace }}
+  name: tenant-{{ .Values.deployer.guid }}
+  namespace: {{ .Values.keycloak.namespace }}
   annotations:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
   labels:
-    app.kubernetes.io/name: keycloak-users
+    app.kubernetes.io/name: keycloak-realm
     app.kubernetes.io/component: tenant
-    app.kubernetes.io/instance: {{ $.Values.deployer.guid }}
-    tenant-guid: {{ $.Values.deployer.guid | quote }}
-    tenant-user: "true"
+    app.kubernetes.io/instance: {{ .Values.deployer.guid | quote }}
 spec:
-  realmName: {{ $.Values.keycloak.realmName }}
-  user:
-    username: {{ $username }}
+  keycloakCRName: keycloak
+  realm:
+    id: tenant-{{ .Values.deployer.guid }}
+    realm: tenant-{{ .Values.deployer.guid }}
     enabled: true
-    emailVerified: {{ $.Values.users.emailVerified }}
-    email: {{ $username }}@{{ $.Values.users.emailDomain }}
-    firstName: {{ $.Values.users.firstName }}{{ $userNum }}
-    lastName: {{ $.Values.users.lastName }}
-    credentials:
-      - type: password
-        value: {{ $.Values.users.password }}
-        temporary: {{ $.Values.users.temporary }}
-    {{- if $.Values.users.realmRoles }}
-    realmRoles:
-      {{- toYaml $.Values.users.realmRoles | nindent 6 }}
-    {{- end }}
-    {{- if $.Values.users.groups }}
-    groups:
-      {{- toYaml $.Values.users.groups | nindent 6 }}
-    {{- end }}
-    {{- if $.Values.attributes }}
-    attributes:
-      {{- range $key, $value := $.Values.attributes }}
-      {{ $key }}:
-        - {{ tpl ($value | toString) $ | quote }}
+    sslRequired: external
+    registrationAllowed: false
+    loginWithEmailAllowed: true
+    duplicateEmailsAllowed: false
+    roles:
+      realm:
+        {{- toYaml .Values.users.realmRoles | nindent 8 }}
+{{- if $userList }}
+    users:
+      {{- range $user := $userList }}
+      - username: {{ $user.username }}
+        enabled: true
+        emailVerified: {{ $.Values.users.emailVerified }}
+        email: {{ $user.username }}@{{ $.Values.users.emailDomain }}
+        firstName: {{ $user.firstName }}
+        lastName: {{ $.Values.users.lastName }}
+        credentials:
+          - type: password
+            value: {{ $.Values.users.password }}
+            temporary: {{ $.Values.users.temporary }}
+        {{- if $.Values.users.realmRoles }}
+        realmRoles:
+          {{- range $.Values.users.realmRoles }}
+          - {{ .name }}
+          {{- end }}
+        {{- end }}
+        {{- if $.Values.users.groups }}
+        groups:
+          {{- toYaml $.Values.users.groups | nindent 10 }}
+        {{- end }}
       {{- end }}
-    {{- end }}
+{{- else }}
+    users: []
 {{- end }}
-{{- end }}
-{{- else if eq .Values.users.mode "explicit" }}
-{{- if .Values.users.explicit.usernames }}
-{{- range $username := .Values.users.explicit.usernames }}
-{{- $fullUsername := $username }}
-{{- if $.Values.users.explicit.appendGuid }}
-{{- $fullUsername = printf "%s-%s" $username $.Values.deployer.guid }}
-{{- end }}
----
-apiVersion: k8s.keycloak.org/v2alpha1
-kind: KeycloakUser
-metadata:
-  name: {{ $fullUsername }}
-  namespace: {{ $.Values.keycloak.namespace }}
-  labels:
-    app.kubernetes.io/name: keycloak-users
-    app.kubernetes.io/component: tenant
-    app.kubernetes.io/instance: {{ $.Values.deployer.guid }}
-    tenant-guid: {{ $.Values.deployer.guid | quote }}
-    tenant-user: "true"
-spec:
-  realmName: {{ $.Values.keycloak.realmName }}
-  user:
-    username: {{ $fullUsername }}
-    enabled: true
-    emailVerified: {{ $.Values.users.emailVerified }}
-    email: {{ $fullUsername }}@{{ $.Values.users.emailDomain }}
-    firstName: {{ $username | title }}
-    lastName: {{ $.Values.users.lastName }}
-    credentials:
-      - type: password
-        value: {{ $.Values.users.password }}
-        temporary: {{ $.Values.users.temporary }}
-    {{- if $.Values.users.realmRoles }}
-    realmRoles:
-      {{- toYaml $.Values.users.realmRoles | nindent 6 }}
-    {{- end }}
-    {{- if $.Values.users.groups }}
-    groups:
-      {{- toYaml $.Values.users.groups | nindent 6 }}
-    {{- end }}
-    {{- if $.Values.attributes }}
-    attributes:
-      {{- range $key, $value := $.Values.attributes }}
-      {{ $key }}:
-        - {{ tpl ($value | toString) $ | quote }}
-      {{- end }}
-    {{- end }}
-{{- end }}
-{{- end }}
-{{- end }}
+    groups: []

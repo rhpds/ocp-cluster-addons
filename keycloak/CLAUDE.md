@@ -186,3 +186,14 @@ There are four possible bootstrapper apps, with their attendant charts:
 In the template directory the author places the argo apps that call helm other argo apps or helm charts.
 
 It holds the helm values and argo parameters for the infra or the tenant.
+
+## Operator CatalogSources
+
+Sometimes upstream catalogsources become corrupt, and we must revert to older catalog sources.
+
+When creating the option to use a catalogsource that is not the default, there
+is no need to mention disconnected environments. We do not run these in a
+disconencted environment.  The catalogsource we use at quay.io is to pin
+catalogsources at particular versions, which often become inaccessible to online openshift
+installs.  
+

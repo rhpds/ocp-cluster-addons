@@ -9,7 +9,12 @@
       "Bash(helm template:*)",
       "Bash(bash:*)",
       "Bash(grep:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "WebSearch",
+      "WebFetch(domain:www.keycloak.org)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:docs.redhat.com)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

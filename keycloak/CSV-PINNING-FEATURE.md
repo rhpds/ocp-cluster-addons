@@ -31,7 +31,7 @@ Two major features have been added:
 
 #### Files Created:
 - `infra/examples/pinned-operator-version.yaml` - Example with CSV pinning
-- `infra/examples/disconnected-operator.yaml` - Example for air-gapped environments
+- `infra/examples/disconnected-operator.yaml` - Example with custom catalog source
 
 ## New Configuration Options
 
@@ -151,9 +151,9 @@ operator:
 - Always testing latest features
 - Minimal configuration
 
-### Use Case 3: Disconnected/Air-Gapped Environment
+### Use Case 3: Custom Catalog Source
 
-Use custom catalog with pinned version:
+Use a custom catalog with a pinned version:
 
 ```yaml
 operator:
@@ -172,8 +172,7 @@ operator:
 ```
 
 **Benefits:**
-- Works in disconnected environments
-- Use mirrored operator catalogs
+- Use custom or mirrored operator catalogs
 - Control which versions are available
 
 ## Troubleshooting
@@ -340,6 +339,6 @@ oc logs -n keycloak job/rhbk-operator-installplan-approver -f
 
 - [Operator Chart README](infra/charts/keycloak-operator/README.md)
 - [Example: Pinned Version](infra/examples/pinned-operator-version.yaml)
-- [Example: Disconnected Environment](infra/examples/disconnected-operator.yaml)
+- [Example: Custom Catalog Source](infra/examples/disconnected-operator.yaml)
 - [OLM Documentation](https://olm.operatorframework.io/)
 - [ArgoCD Sync Waves](https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/)

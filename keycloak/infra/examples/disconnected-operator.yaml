@@ -1,5 +1,5 @@
 ---
-# Example: Keycloak Operator for Disconnected/Air-Gapped Environments
+# Example: Keycloak Operator with Custom Catalog Source
 # This configuration uses a custom catalog source and pins to a specific CSV version.
 
 # Override values for infra/charts/keycloak-operator
@@ -27,7 +27,7 @@ operator:
     # Use internal registry image
     image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
 
-  # Custom Catalog Source - Required for disconnected environments
+  # Custom Catalog Source
   catalogSource:
     enabled: true
     name: custom-redhat-catalog
@@ -37,7 +37,7 @@ operator:
     image: quay.io/gpte-devops-automation/olm_snapshot_redhat_catalog
     tag: v4.20_2025_10_23
 
-# How to use in disconnected environments:
+# How to use with a custom catalog source:
 #
 # 1. Mirror the operator catalog to your registry:
 #    oc adm catalog mirror \

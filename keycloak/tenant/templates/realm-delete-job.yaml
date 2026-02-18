@@ -1,0 +1,65 @@
+{{- if .Values.cleanup.realmDeletion.enabled }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: delete-realm-tenant-{{ .Values.deployer.guid }}
+  namespace: {{ .Values.keycloak.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: PreDelete
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+  labels:
+    app.kubernetes.io/name: realm-delete
+    app.kubernetes.io/component: tenant
+    app.kubernetes.io/instance: {{ .Values.deployer.guid | quote }}
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: delete-realm
+          image: {{ .Values.cleanup.realmDeletion.image }}
+          env:
+            - name: KC_URL
+              value: {{ .Values.cleanup.realmDeletion.keycloakServiceUrl | quote }}
+            - name: REALM_NAME
+              value: tenant-{{ .Values.deployer.guid }}
+            - name: KC_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.cleanup.realmDeletion.adminSecret }}
+                  key: username
+            - name: KC_ADMIN_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.cleanup.realmDeletion.adminSecret }}
+                  key: password
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+              echo "Obtaining admin token from ${KC_URL}..."
+              TOKEN=$(curl -sk -X POST \
+                "${KC_URL}/realms/master/protocol/openid-connect/token" \
+                -d "grant_type=password&client_id=admin-cli&username=${KC_ADMIN_USER}&password=${KC_ADMIN_PASS}" \
+                | python3 -c "import sys,json; print(json.load(sys.stdin).get('access_token',''))")
+
+              if [ -z "$TOKEN" ]; then
+                echo "ERROR: Failed to obtain admin token"
+                exit 1
+              fi
+
+              echo "Deleting realm ${REALM_NAME}..."
+              HTTP_CODE=$(curl -sk -o /dev/null -w '%{http_code}' -X DELETE \
+                "${KC_URL}/admin/realms/${REALM_NAME}" \
+                -H "Authorization: Bearer ${TOKEN}")
+
+              case "$HTTP_CODE" in
+                204) echo "Realm ${REALM_NAME} deleted." ;;
+                404) echo "Realm ${REALM_NAME} not found (already deleted)." ;;
+                *)   echo "ERROR: Unexpected response: HTTP ${HTTP_CODE}"; exit 1 ;;
+              esac
+{{- end }}
