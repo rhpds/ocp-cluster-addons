@@ -1,0 +1,92 @@
+{{- if and .Values.operator .Values.operator.autoApprove -}}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: rhoai-installplan-approver
+  namespace: {{ .Values.operator.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "1"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: rhoai-installplan-approver-{{ .Values.operator.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "1"
+rules:
+  - apiGroups: ["operators.coreos.com"]
+    resources: ["subscriptions", "installplans"]
+    verbs: ["get", "list", "watch", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: rhoai-installplan-approver-{{ .Values.operator.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: rhoai-installplan-approver-{{ .Values.operator.namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: rhoai-installplan-approver
+    namespace: {{ .Values.operator.namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rhoai-installplan-approver
+  namespace: {{ .Values.operator.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded,HookFailed
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      serviceAccountName: rhoai-installplan-approver
+      restartPolicy: Never
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: approver
+          image: image-registry.openshift-image-registry.svc:5000/openshift/tools:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+              subscription="{{ .Values.operator.name }}"
+              namespace="{{ .Values.operator.namespace }}"
+
+              echo "Waiting for an InstallPlan to be created for subscription '$subscription' in '$namespace'..."
+              installplan=""
+              for i in $(seq 1 30); do
+                installplan="$(oc get subscriptions.operators.coreos.com "$subscription" -n "$namespace" -o jsonpath='{.status.installPlanRef.name}' 2>/dev/null || true)"
+                if [ -n "$installplan" ]; then
+                  echo "Found InstallPlan '$installplan' (attempt $i/30)"
+                  break
+                fi
+                echo "No InstallPlan yet (attempt $i/30), sleeping 10s..."
+                sleep 10
+              done
+
+              if [ -z "$installplan" ]; then
+                echo "ERROR: no InstallPlan appeared for subscription '$subscription' after 5 minutes"
+                exit 1
+              fi
+
+              approved="$(oc get installplan "$installplan" -n "$namespace" -o jsonpath='{.spec.approved}')"
+              if [ "$approved" == "false" ]; then
+                echo "Approving InstallPlan '$installplan' for subscription '$subscription'"
+                oc patch installplan "$installplan" -n "$namespace" --type=json -p='[{"op":"replace","path":"/spec/approved","value":true}]'
+              else
+                echo "InstallPlan '$installplan' already approved"
+              fi
+{{- end }}
