@@ -64,6 +64,7 @@ spec:
               set -euo pipefail
               subscription="{{ .Values.operator.name }}"
               namespace="{{ .Values.operator.namespace }}"
+              expected_csv="{{ .Values.operator.startingCSV | default "" }}"
 
               echo "Waiting for an InstallPlan to be created for subscription '$subscription' in '$namespace'..."
               installplan=""
@@ -80,6 +81,14 @@ spec:
               if [ -z "$installplan" ]; then
                 echo "ERROR: no InstallPlan appeared for subscription '$subscription' after 5 minutes"
                 exit 1
+              fi
+
+              actual_csv="$(oc get installplan "$installplan" -n "$namespace" -o jsonpath='{.spec.clusterServiceVersionNames[0]}')"
+              echo "InstallPlan '$installplan' targets CSV '$actual_csv'"
+
+              if [ -n "$expected_csv" ] && [ "$actual_csv" != "$expected_csv" ]; then
+                echo "SKIPPING: InstallPlan '$installplan' targets '$actual_csv', which does not match the pinned startingCSV '$expected_csv'. Refusing to approve to avoid silently upgrading past the pin."
+                exit 0
               fi
 
               approved="$(oc get installplan "$installplan" -n "$namespace" -o jsonpath='{.spec.approved}')"
