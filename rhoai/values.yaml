@@ -55,7 +55,7 @@ patcher:
   name: rhoai-patcher
   namespace: redhat-ods-applications
   syncwave: "0"
-  image: registry.redhat.io/openshift4/ose-cli:v4.17
+  image: registry.redhat.io/openshift4/ose-cli-rhel9:v4.17
   # route: true
   # dashboard:
   #   replicas: 1
