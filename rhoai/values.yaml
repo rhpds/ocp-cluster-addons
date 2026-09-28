@@ -12,6 +12,10 @@ operator:
   source: redhat-operators
   sourceNamespace: openshift-marketplace
   # startingCSV: rhods-operator.x.y.x
+  # Set to true to render a Sync-phase hook Job that approves the pending
+  # InstallPlan for this Subscription. Only needed/used when
+  # installPlanApproval is Manual. See templates/installplan-approver.yaml.
+  autoApprove: false
 
 # Set to empty to NOT install DSCInitialization
 dscinitialization: ''
@@ -55,14 +59,23 @@ patcher:
   name: rhoai-patcher
   namespace: redhat-ods-applications
   syncwave: "0"
-  image: registry.redhat.io/openshift4/ose-cli
+  # NOTE: was registry.redhat.io/openshift4/ose-cli (no tag). That repo now
+  # rejects `:latest` pulls, causing permanent ImagePullBackOff. The in-cluster
+  # openshift/tools imagestream is always present and always pullable,
+  # regardless of OCP version.
+  image: image-registry.openshift-image-registry.svc:5000/openshift/tools:latest
   # route: true
   # dashboard:
   #   replicas: 1
 
 # Using sub-chart helper-status-checker
+# NOTE: disabled by default. Its Jobs also hardcode the now-broken
+# registry.redhat.io/openshift4/ose-cli (no tag) image with no values override
+# available in any released chart version (checked through 4.0.21), so they
+# permanently ImagePullBackOff. Use operator.autoApprove above instead of
+# helper-status-checker.approver for InstallPlan approval.
 helper-status-checker:
-  enabled: true
+  enabled: false
   approver: false
   checks:
     - operatorName: rhods-operator
