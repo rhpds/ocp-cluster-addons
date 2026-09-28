@@ -1,6 +1,6 @@
 dependencies:
 - name: tpl
   repository: https://charts.stderr.at/
-  version: 1.0.10
-digest: sha256:placeholder-vendored-helper-status-checker
-generated: "2026-09-28T00:00:00.000000+00:00"
+  version: 1.0.31
+digest: sha256:2be828bda4b5b06a9b7bb42577cb0f8a087a998aae92bea1620fad91f2079ae2
+generated: "2026-09-28T05:07:22.542384+00:00"
