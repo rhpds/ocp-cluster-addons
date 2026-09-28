@@ -1,0 +1,13 @@
+apiVersion: v2
+name: helper-status-checker
+description: A helper Chart that creates a job to verify if the deployments of an operator are running.
+version: 4.0.11
+home: https://github.com/tjungbauer/helm-charts/tree/main/charts/helper-status-checker
+maintainers:
+- email: tjungbau@redhat.com
+  name: tjungbauer
+  url: https://blog.stderr.at/
+dependencies:
+- name: tpl
+  repository: https://charts.stderr.at/
+  version: ~1.0.0

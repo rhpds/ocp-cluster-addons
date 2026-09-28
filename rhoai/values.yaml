@@ -55,12 +55,12 @@ patcher:
   name: rhoai-patcher
   namespace: redhat-ods-applications
   syncwave: "0"
-  image: registry.redhat.io/openshift4/ose-cli
+  image: registry.redhat.io/openshift4/ose-cli:v4.17
   # route: true
   # dashboard:
   #   replicas: 1
 
-# Using sub-chart helper-status-checker
+# Using vendored sub-chart helper-status-checker (v4.0.11)
 helper-status-checker:
   enabled: true
   approver: false

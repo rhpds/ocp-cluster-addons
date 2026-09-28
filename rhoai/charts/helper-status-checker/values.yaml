@@ -1,0 +1,20 @@
+---
+# -- Enable or disable the status-checker configuration
+# @default -- false
+enabled: true
+
+# -- Enable automatic approval of an InstallPlan.
+# @default -- false
+approver: false
+
+# List of checks that shall be performed.
+checks:
+  - operatorName: name-of-operator
+    subscriptionName: name-of-subscription
+    sleeptimer: 20
+    maxretries: 20
+    namespace:
+      name: openshift-logging
+    syncwave: 0
+    serviceAccount:
+      name: "status-checker"
